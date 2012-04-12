@@ -24,3 +24,7 @@ gem 'bson_ext'
 
 # Testing
 #gem 'rspec'
+
+
+# Data Generation
+gem 'random_data'

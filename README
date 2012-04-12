@@ -1,0 +1,17 @@
+
+
+
+### Data Outline ###
+App 1 :  Twitter
+
+hashtags: 10k
+users 100k
+
+for each_user
+	decide high_user or low_user
+	assign 10-20 vs 100-200 posts respectively
+	each post gets 0-2 hashtags
+end
+
+
+App 2 : Forum
