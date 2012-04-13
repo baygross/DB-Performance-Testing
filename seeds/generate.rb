@@ -23,15 +23,15 @@ Class Generate
   def num_users
     @@num_users
   end
-  def power_user
-    @@power_user
-  end
-  def new_user
-    @@new_user
-  end
-  def power_user_ratio
-    @@power_user_ratio
-  end
+  # def power_user
+  #    @@power_user
+  #  end
+  #  def new_user
+  #    @@new_user
+  #  end
+  #  def power_user_ratio
+  #    @@power_user_ratio
+  #  end
 
   #-----Methods------------------------------------------
   

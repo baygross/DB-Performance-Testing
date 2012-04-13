@@ -37,7 +37,7 @@ conn.exec('CREATE TABLE hashtags_tweets(hashtag_id Integer, tweet_id Integer);')
 #
 conn.exec('BEGIN')
   #add all of the users and tweets to the db
-  @num_users.times do |i|
+  Generate.num_users.times do |i|
 
     #every 5000 iterations, commit to disk
     if i%5000==0
@@ -64,7 +64,7 @@ conn.exec('COMMIT')
 #  Create Hashtags
 #
 conn.exec('BEGIN')
-  @num_hashtags.times do |i|
+  Generate.num_hashtags.times do |i|
     #every 5000 iterations, commit to disk
     if i%5000==0
       conn.exec('COMMIT')
