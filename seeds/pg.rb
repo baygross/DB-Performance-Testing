@@ -3,15 +3,16 @@
 require 'pg'
 require 'generate.rb'
 
+Generate = Generator.new()
 #
 # Initialize our connection to PG database
 #
 conn = PGconn.open({ 
-            host:  '',
-            port: '',
-            login: '',
-            password: '',
-            dbname: 'app1'
+            :host => '',
+            :port =>  '',
+            :login =>  '',
+            :password =>  '',
+            :dbname =>  'app1'
        })
 
 

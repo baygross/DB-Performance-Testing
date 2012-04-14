@@ -1,16 +1,16 @@
 #!/usr/bin/env ruby
 require 'random_data'
 
-Class Generate
+class Generator
   #--Configure ---------------------------------------
 
   # App1 
-  @@num_hashtags = 10000
-  @@num_users = 100000
+  @num_hashtags = 10000
+  @num_users = 100000
 
-  @@power_user = [100, 200]  #range of tweets
-  @@new_user = [0, 25]     #range of tweets
-  @@power_user_ratio = 0.5   #ratio of users that are 'power' 
+  @power_user = [100, 200]  #range of tweets
+  @new_user = [0, 25]     #range of tweets
+  @power_user_ratio = 0.5   #ratio of users that are 'power' 
 
   # App2
 
@@ -18,23 +18,23 @@ Class Generate
 
   #Config Accessors
   def num_hashtags
-    @@num_hashtags
+    @num_hashtags
   end
   def num_users
-    @@num_users
+    @num_users
   end
   # def power_user
-  #    @@power_user
+  #    @power_user
   #  end
   #  def new_user
-  #    @@new_user
+  #    @new_user
   #  end
   #  def power_user_ratio
-  #    @@power_user_ratio
+  #    @power_user_ratio
   #  end
 
   #-----Methods------------------------------------------
-  
+
   #creates a twitter user object for APP1
   def twitter_user
 
@@ -45,24 +45,24 @@ Class Generate
       :bio => randTweet,
       :tweets => []
     }
-  
+
     #decide if the user is a power user or a new user
-    if rand < @@power_user_ratio
-      num_tweets = (rand(@@power_user[1]) + @@power_user[0])
+    if rand < @power_user_ratio
+      num_tweets = (rand(@power_user[1]) + @power_user[0])
     else 
-      num_tweets = (rand(@@new_user[1]) + @@new_user[0])
+      num_tweets = (rand(@new_user[1]) + @new_user[0])
     end
 
     #generate tweets for this user
     num_tweets.times do |t|
       user[:tweets] << randTweet
     end
-    
+
     #return the user!
     user
   end
-  
-  
+
+
   #generates a random hashtag for app1
   #hashtags can (randomly) be 1,2 or 3 words long
   def twitter_hashtag
@@ -84,10 +84,10 @@ Class Generate
 
     ret
   end
-  
+
   #-----Privaet Methods------------------------------------
   private
-  
+
   # generates a random tweet
   # and ensures there is no \n at end
   def randTweet
