@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'pg'
-require 'generate.rb'
+require_relative 'generate.rb'
 
 Generate = Generator.new()
 #
@@ -25,12 +25,15 @@ conn.exec('CREATE TABLE users(id SERIAL PRIMARY KEY, first_name VARCHAR(32), las
 
 #create table for tweets that has tweet and id of user
 conn.exec('CREATE TABLE tweets(id SERIAL PRIMARY KEY, tweet VARCHAR(140), user_id INTEGER);')
+conn.exec('CREATE INDEX user_index ON tweets (user_id);')
 
 #create a table for hashtags
 conn.exec('CREATE TABLE hashtags(id SERIAL PRIMARY KEY, hashtag VARCHAR(140));')
 
 #create a join table for hashtags and tweets
 conn.exec('CREATE TABLE hashtags_tweets(hashtag_id Integer, tweet_id Integer);')
+conn.exec('CREATE INDEX ht_tweet ON hashtags_tweets (tweet_id);')
+conn.exec('CREATE INDEX ht_hashtag ON hashtags_tweets (hashtag_id);')
 
 
 #
@@ -58,7 +61,9 @@ conn.exec('BEGIN')
       conn.exec('INSERT INTO tweets(tweet, user_id) VALUES($1, $2)', [tweet, current_user])
     end
   end
-conn.exec('COMMIT')
+  
+  #flush buffer
+  conn.exec('COMMIT')
 
 
 #

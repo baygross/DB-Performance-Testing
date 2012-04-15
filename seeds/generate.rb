@@ -5,12 +5,14 @@ class Generator
   #--Configure ---------------------------------------
 
   # App1 
-  @num_hashtags = 10000
-  @num_users = 100000
+  def initialize
+    @num_hashtags = 10000
+    @num_users = 600
 
-  @power_user = [100, 200]  #range of tweets
-  @new_user = [0, 25]     #range of tweets
-  @power_user_ratio = 0.5   #ratio of users that are 'power' 
+    @power_user = [100, 200]  #range of tweets
+    @new_user = [0, 25]     #range of tweets
+    @power_user_ratio = 0.5   #ratio of users that are 'power' 
+  end
 
   # App2
 
@@ -18,10 +20,10 @@ class Generator
 
   #Config Accessors
   def num_hashtags
-    @num_hashtags
+    return @num_hashtags
   end
   def num_users
-    @num_users
+    return @num_users
   end
   # def power_user
   #    @power_user
@@ -36,7 +38,7 @@ class Generator
   #-----Methods------------------------------------------
 
   #creates a twitter user object for APP1
-  def twitter_user
+  def twitter_user( ops = {} )
 
     #generate our new user
     user = {
@@ -55,7 +57,19 @@ class Generator
 
     #generate tweets for this user
     num_tweets.times do |t|
-      user[:tweets] << randTweet
+      twt = randTweet
+      
+      #embed hashtags in tweets if necessary (for mongo!)
+      if ops[:with_hashtags] == true 
+        
+        twt = { :body => twt, :hashtags => []}
+        rand(3).times do 
+          twt[:hashtags] << twitter_hashtag
+        end
+        
+      end
+      
+      user[:tweets] << twt
     end
 
     #return the user!
@@ -80,7 +94,7 @@ class Generator
     end
 
     #TODO: make this a single gsub regex
-    ret.gsub('\'', '').gsub('\"', '').gsub('.', '').gsub('?', '').gsub('!', '').gsub(',', '')
+    ret = ret.gsub(/[\'\"\.\?\!\, ]/, '')
 
     ret
   end

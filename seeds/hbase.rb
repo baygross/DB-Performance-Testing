@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'hbase'
-require 'generate.rb'
+require_relative 'generate.rb'
 
 #initiate our generator object
 Generate = Generator.new()

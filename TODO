@@ -2,21 +2,16 @@
 APP 1  BY Wednesday's class!!
 
 	PG 
+	- test clustering on user_id instead of primary
 	-	create PG database and add connection info to pg seed file
-	-	add indexes to seed file?
-	- test code -^
 	
 	- write test harness
 	
 	
 	MONGO
 	- create Mongo DB and add connection info to mongo seed file
-	- add indexes to seed file?
-	- figure out Hashtag foreign keys?
-	- batch inserts?
-	- test code -^
 	
-	- write test harness
+	- write test harness ( w/ MapReduce? )
 	
 	
 	HBase

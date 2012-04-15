@@ -2,7 +2,7 @@
 
 #require 'rubygems'  # not necessary for Ruby 1.9
 require 'mongo'
-require 'generate.rb'
+require_relative 'generate.rb'
 
 #initiate our generator object
 Generate = Generator.new()
@@ -16,27 +16,28 @@ db = connection.db("app1")
 #
 # Create our collections
 #
-Users = db.collection("Users")
-Hashtags = db.collection("Hashtags")
-#Users.create_index("fname")
+Users = db.collection("users")
+# hashtags will be kept inside tweets inside users
+Users.create_index('fname')
+Users.create_index( 'tweets.hashtags' )
 
 #
-# Generate the users!
+# Generate the users collection w/ embeded tweets & hashtags!
 #
 
+user_block = []
 Generate.num_users.times do |i|
-  user = Generate.twitter_user
-  Users.insert(user)
-end
-
-
-#
-# Generate the hashtags!
-#
-Generate.num_hashtags.times do |i|
-
-  #get a hashtag from the Generate API class
-  hashtag = Generate.twitter_hashtag
-  Hashtags.insert(hashtag)
+  
+  #grab a new user obj w/ embeded tweets + hashtags
+  user_block << Generate.twitter_user( { :with_hashtags => true } )
+  
+  # batch insert every 500 users
+  if i%500==0
+    Users.insert( user_block )
+    user_block = []
+  end
 
 end
+
+#flush
+Users.insert( user_block )
