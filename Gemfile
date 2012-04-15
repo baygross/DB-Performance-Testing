@@ -6,8 +6,8 @@ source 'http://gems.github.com'
 gem 'pg'
 
 # HBase
-# https://github.com/sishen/hbase-ruby
-gem 'sishen-hbase-ruby'
+#https://github.com/greglu/hbase-stargate
+gem 'hbase-stargate'
 
 # DB2
 # http://rubyforge.org/projects/rubyibm/
