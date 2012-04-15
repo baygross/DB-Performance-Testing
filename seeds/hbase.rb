@@ -9,6 +9,8 @@ Generate = Generator.new()
 #
 # Connect to HBase DB
 #
+db = Stargate::Client.new("http://ec2-23-22-57-68.compute-1.amazonaws.com:8080")
+
 
 
 
