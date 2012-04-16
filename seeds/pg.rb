@@ -104,12 +104,12 @@ conn.exec('BEGIN')
 
     #add one hastag to this tweet
     if r < 1/3.to_f
-      conn.exec('INSERT INTO hashtags_tweets(hashtag_id, tweet_id) VALUES ($1, $2)', [i, (rand*(max_hash+1-min_hash)+min_hash).floor])
+      conn.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [i, (rand*(max_hash+1-min_hash)+min_hash).floor])
     end
 
     #add a second hashtag to this tweet
     if r < 2/3.to_f
-      conn.exec('INSERT INTO hashtags_tweets(hashtag_id, tweet_id) VALUES ($1, $2)', [i, (rand*(max_hash+1-min_hash)+min_hash).floor])
+      conn.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [i, (rand*(max_hash+1-min_hash)+min_hash).floor])
     end
 
     #else no hashtags!
