@@ -13,7 +13,7 @@ db = Stargate::Client.new("http://ec2-23-22-57-68.compute-1.amazonaws.com:8080")
 
 
 #create user table
-users = db.create_table('users', 'info')
+users = db.create_table('users', 'info', 'tweets')
 
 #create tweet table
 tweets = db.create_table('tweets', 'content')
@@ -55,30 +55,20 @@ Generate.num_users.times do |i|
     tweets=Array.new
     user[:tweets].each do |tweet|
 
-        ### NOTE: does this work? will it overwrite the row?  ###
-
         db.create_row('tweets', tweet_id, Time.now.to_i, {:name => 'content:body', :value => tweet})
-        db.create_row('users', user_id, Time.now.to_i, {:name => 'info:tweet', :value => tweet_id})
+        db.create_row('users', user_id, Time.now.to_i, {:name => 'tweets:'+tweet_id.to_s, :value => tweet_id})
 
         #add 0-2 hashtags to each tweet
-        r=rand
-
-
-        ####  NOTE: Do we want to view all tweets with a given hashtag, 
-        #     view all hashtags within a tweet or both?
-        #     right now, option 3 is implemented
-        
+        r=rand        
         
         #add one hastag to this tweet
         if r < 1/3.to_f
-            db.create_row('tweets', tweet_id, Time.now.to_i, {:name => 'content:hashtag', :value => (rand * tag_id).floor})
-            db.create_row('hastags', (rand * tag_id).floor, Time.now.to_i, {:name => 'tag:tweet', :value => tweet_id})
+            db.create_row('hastags', (rand * tag_id).floor, Time.now.to_i, {:name => 'tag:tweet'+tweet_id.to_s, :value => tweet_id})
         end
 
         #add a second hashtag to this tweet
         if r < 2/3.to_f
-            db.create_row('tweets', tweet_id, Time.now.to_i, {:name => 'content:hashtag', :value => (rand * tag_id).floor})
-            db.create_row('hastags', (rand * tag_id).floor, Time.now.to_i, {:name => 'tag:tweet', :value => tweet_id})
+            db.create_row('hastags', (rand * tag_id).floor, Time.now.to_i, {:name => 'tag:tweet'+tweet_id.to_s, :value => tweet_id})
         end
 
         #else no hashtags!
