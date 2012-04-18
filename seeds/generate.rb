@@ -6,8 +6,8 @@ class Generator
 
   # App1 
   def initialize
-    @num_hashtags = 10000
-    @num_users = 600
+    @num_hashtags = 10000   #10k
+    @num_users = 100000     #100k
 
     @power_user = [100, 200]  #range of tweets
     @new_user = [0, 25]     #range of tweets
