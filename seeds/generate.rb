@@ -99,8 +99,7 @@ class Generator
     ret
   end
 
-  #-----Privaet Methods------------------------------------
-  private
+  
 
   # generates a random tweet
   # and ensures there is no \n at end
@@ -113,7 +112,6 @@ class Generator
       ret = ret.slice(0, 140)
     end
 
-  end
 
 
 end
