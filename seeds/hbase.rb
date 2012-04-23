@@ -6,7 +6,7 @@ require 'YAML'
 def seedHBase( num_users, num_hashtags )
 
   puts "*********************************************"
-  puts "Starting Seed of Mongo"
+  puts "Starting Seed of HBase"
   puts "- connecting to DB"
   #
   # Connect to HBase DB
@@ -15,6 +15,14 @@ def seedHBase( num_users, num_hashtags )
   address = 'http://' + config['host'] + ':' + config['port'].to_s
   p address
   @db = Stargate::Client.new( address )
+
+
+  #
+  #Get rid of existing tables
+  #
+  tables = @db.list_tables.each do |table|
+      @db.delete_table(table)
+  end
 
   #
   # Create our tables!
