@@ -23,7 +23,6 @@ gem 'bson_ext'
 
 
 # Testing
-#gem 'rspec'
 
 
 # Data Generation
