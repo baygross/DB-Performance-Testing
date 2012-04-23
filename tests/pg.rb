@@ -7,13 +7,13 @@ require_relative 'generate.rb'
 class PGTest
 
   def initialize
-    CONFIG = YAML.load_file(Rails.root.join('../config/db.yml'))['PG']
-    @db = PGdb.open({ 
-            :host => CONFIG['host'],
-            :port => CONFIG['port'],
-            :user => CONFIG['user'],
-            :password => CONFIG['password']
-            :dbname => CONFIG['dbname']
+    config = YAML.load_file( @@path + '../config/db.yml' )['PG']
+    @db = PG.connect({ 
+            :host => config['host'],
+            :port => config['port'],
+            :user => config['user'],
+            :password => config['password']
+            :dbname => config['dbname']
            })
   end
 

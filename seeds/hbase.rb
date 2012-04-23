@@ -8,9 +8,9 @@ def seedHBase( num_users, num_hashtags )
   #
   # Connect to HBase DB
   #
-  CONFIG = YAML.load_file(Rails.root.join('../config/db.yml'))['HBase']
-  address = 'http://' + CONFIG['host'] + ':' + CONFIG['port'])
-  @db = Stargate::Client.new(Stargate::Client.new(address)
+  config = YAML.load_file( @@path + '../config/db.yml' )['HBase']
+  address = 'http://' + config['host'] + ':' + config['port']
+  @db = Stargate::Client.new( Stargate::Client.new(address) )
 
   #
   # Create our tables!

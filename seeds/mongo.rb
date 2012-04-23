@@ -7,18 +7,18 @@ def seedMongo(num_users, num_hashtags)
   #
   # Connect to Mongo DB
   #
-  CONFIG = YAML.load_file(Rails.root.join('../config/db.yml'))['Mongo']
-  connection = Mongo::Connection.new(CONFIG['host'], CONFIG['port'])
-  @db = connection.db(CONFIG['db'])
+  config = YAML.load_file( @@path + '../config/db.yml' )['Mongo']
+  connection = Mongo::Connection.new(config['host'], config['port'])
+  @db = connection.db(config['db'])
 
 
   #
   # Create our collections
   #
-  Users = @db.collection("users")
+  users = @db.collection("users")
   # hashtags will be kept inside tweets inside users
-  Users.create_index('fname')
-  Users.create_index( 'tweets.hashtags' )
+  users.create_index('fname')
+  users.create_index( 'tweets.hashtags' )
 
 
   #
@@ -33,12 +33,12 @@ def seedMongo(num_users, num_hashtags)
   
     # batch insert every 500 users
     if i%500==0
-      Users.insert( user_block )
+      users.insert( user_block )
       user_block = []
     end
 
   end
 
   #flush
-  Users.insert( user_block )
+  users.insert( user_block )
 end
