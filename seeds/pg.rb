@@ -62,13 +62,14 @@ def seedPG( num_users, num_hashtags )
 
     #add that user
     cid = @db.exec('INSERT INTO users(first_name, last_name, bio) VALUES ($1, $2, $3) RETURNING id;' , [user[:fname], user[:lname], user[:bio]])
-    cid = cid[0][0].to_i
+    cid = cid[0]['id'].to_i
 
     user[:tweets].map! do |tweet|
       sprintf("('%s',%s)",tweet.gsub(/'/, ""),cid)
     end
     
-    @db.exec(sprintf('INSERT INTO tweets(tweet, user_id) VALUES %s', user[:tweets].join(",")))
+    q = sprintf('INSERT INTO tweets(tweet, user_id) VALUES %s', user[:tweets].join(","))
+    @db.exec( q )
   end
 
 
@@ -97,33 +98,25 @@ def seedPG( num_users, num_hashtags )
   min_tweet = @db.exec("SELECT MIN(id) FROM tweets;")[0]["min"].to_i
   max_tweet = @db.exec("SELECT MAX(id) FROM tweets;")[0]["max"].to_i
   min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
-  max_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["max"].to_i
-
+  max_hash = @db.exec("SELECT Max(id) FROM hashtags;")[0]["max"].to_i
+  
   puts "Associating tweets with hashtags. Hold on..."
   s = Time.now
   assocs = []
   #loop over all tweets
   for i in (min_tweet..max_tweet)
     
-    #random 0-2 hashtags per tweet
-    r=rand
-
-    #add one hastag to this tweet
-    if r < 1/3.to_f
-      assocs << [i, (rand*(max_hash+1-min_hash)+min_hash).floor]
+    #add 0-2 hashtags per tweet
+    rand(2).times do
+      assocs << [ i, rand(max_hash)+min_hash ]
     end
-
-    #add a second hashtag to this tweet
-    if r < 2/3.to_f
-      assocs << [i, (rand*(max_hash+1-min_hash)+min_hash).floor]
-    end
-
-    #else no hashtags!
+    
   end
   
   assocs.map!{|set| sprintf("(%s,%s)",set[0],set[1])}
+  q = 'INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ' + assocs.join(",")
   #save them all en masse
-  @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ' + assocs.join(","))
+  @db.exec( q )
   
   puts (Time.now - s).to_s
 end

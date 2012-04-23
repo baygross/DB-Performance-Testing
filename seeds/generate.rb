@@ -65,17 +65,15 @@ class Generator
   def twitter_hashtag
 
     r= rand
-    ret = Random.paragraphs(1)
-    ret = ret.split  
+    text = Random.paragraphs(1)
+    text = text.split  
 
-    if r > 0.7
-      ret = ret.sample
-    elsif r > 0.4 || ret.length < 4
-      ret = ret.sample.capitalize + ret.sample.capitalize
-    else
-      ret = ret.sample.capitalize + ret.sample.capitalize + ret.sample.capitalize
+    #hashtags are 1-3 words stuck together
+    ret = ''
+    ( rand(3) + 1 ).times do 
+      ret += text.sample.capitalize
     end
-
+   
     ret.gsub(/[\'\"\.\?\!\, ]*/, '')
 
   end
@@ -85,6 +83,9 @@ class Generator
   def randTweet
 
     ret = Random.paragraphs(1)
+    
+    #limit to 140 characters, 
+    #and remove trailing line break if necessary
     if ret.length <= 140
       ret = ret.slice(0.. -2)
     else
