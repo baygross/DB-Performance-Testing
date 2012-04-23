@@ -5,78 +5,61 @@ require_relative '../seeds/generate.rb'
 
 
 class MongoTest
-    
-    # Connect to Mongo DB
-    def initialize
-        connection = Mongo::Connection.new("23.21.48.157", 27017)
-        db = connection.db("app1")
-        @col = db['users']
-    end
-    
-    #returns an object with ids for users to be used as well as 
-    #actual hashtags to be requested
-    def getTargets (num_users_requested, num_hashtags_requested)        
-        #find the ids of random users
-        users = Array.new
-        ids = Array.new
-        hashes = Array.new
-        rand_hashes = Array.new
-        
-        #create array of all ids
-        @col.find.each do |a|
-            ids.push(a["_id"])
+
+  def initialize
+    config = YAML.load_file( @@path + '../config/db.yml' )['Mongo']
+    connection = Mongo::Connection.new(config['host'], config['port'])
+    @db = connection.db(config['db'])
+    @col = db['users']
+  end
+
+  #params: num_users and num_hashtags requested
+  #returns object with user_ids and hashtags to be used in the next 3 functions
+  def getTargets (num_users_requested, num_hashtags_requested)
             
-            a['tweets'].each do |tweet|
-                tweet[:hashtag].each do |tag|
-                    hashes.push(tag)
-                end
-            end
-        end
-        
-        #choose random vals from array of users
-        num_users_requested.times.each do |i|
-            users.push(ids[rand(ids.count)])
-        end
-        
-        hashes=hashes.uniq      #make sure we are sampling from unique hashes
-        
-        #choose random hashtags from array of hashtags
-        num_hashtags_requested.times.each do |i|
-            rand_hashes.push(hashes[rand(hashes.count)])
-        end
-        
-        # return our final hash
-        {:users => users, :hashtags => rand_hashes}
+    rseed = rand()
+    users = @db.users.find( { random : { $gte : rseed } } ).limit(num_users_requested)
+    if !users
+      users = @db.users.find( { random : { $lte : rseed } } ).limit(num_users_requested)
     end
-    
-    
-    #user_id writes a tweet
-    def Tweet (user_id)
-        new_tweets = (@col.find("_id" => user_id).to_a[0])['tweets']
-        
-        #generate new tweet
-        Generate = Generator.new()
-        tweet = Generate.randTweet
-        hashtags=Array.new
-                  
-        #add 0-2 hashtags.  when adding hashtag
-        rand(2) .times do 
-            hashtags.push('newHashTag')
-        end
-        new_tweets.push({:body => tweet, hashtag:hashtags})
-        
-        #update collection
-        @col.update({"_id" => user_id}, {"$set" => {"tweets" => new_tweets}})
+    users.map!{|u| u['_id']}
+  
+    #oh boy, grab every single hashtag
+    hashtags = @db.users.find.collect{ |u| u.tweets.collect(&:hashtags).flatten }.flatten.uniq
+    hashtags.sample( num_hashtags_requested )
+
+    # return our final hash
+    {:users => users, :hashtags => hashtags}
+  end
+
+
+  #user_id writes a tweet
+  def Tweet (user_id)
+    new_tweets = (@col.find("_id" => user_id).to_a[0])['tweets']
+
+    #generate new tweet
+    Generate = Generator.new()
+    tweet = Generate.randTweet
+    hashtags=Array.new
+
+    #add 0-2 hashtags.  when adding hashtag
+    rand(2) .times do 
+      hashtags.push('newHashTag')
     end
-    
-    
-    #return all tweets that contain hashtag
-    def lookup_hashtag (hashtag)
-        
-    end
-    
-    #lookup all of the tweets for a specific user
-    def lookup_user (user_id)
-        @col.find("_id" => user_id).to_a[0])['tweets']
-    end
+    new_tweets.push({:body => tweet, hashtag:hashtags})
+
+    #update collection
+    @col.update({"_id" => user_id}, {"$set" => {"tweets" => new_tweets}})
+  end
+
+
+  #return all tweets that contain hashtag
+  def lookup_hashtag (hashtag)
+
+  end
+
+  #lookup all of the tweets for a specific user
+  def lookup_user (user_id)
+    @col.find("_id" => user_id).to_a[0])['tweets']
+  end
 end

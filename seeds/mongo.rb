@@ -20,8 +20,11 @@ def seedMongo(num_users, num_hashtags)
   #
   puts "- creating collections"
   users = @db.collection("users")
-  # hashtags will be kept inside tweets inside users
+  puts "- removing existing docs"
+  users.remove({})
+  puts "- ensuring new indexes"
   users.create_index('fname')
+  users.create_index('random') #we use this index to find() randomly
   users.create_index( 'tweets.hashtags' )
 
 
@@ -33,7 +36,11 @@ def seedMongo(num_users, num_hashtags)
   num_users.times do |i|
   
     #grab a new user obj w/ embeded tweets + hashtags
-    user_block << @Generate.twitter_user( { :with_hashtags => true } )
+    user = @Generate.twitter_user( { :with_hashtags => true } )
+    #add a random index on it for selecting on later
+    user[:random] = Math.random()
+    #and add to our buffer
+    user_block << user
   
     # batch insert every 500 users
     if i%500==0

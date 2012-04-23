@@ -32,8 +32,8 @@ def main
   
   # and finally seed each DB in turn
   #seedPG( num_users, num_hashtags )
-  #seedMongo( num_users, num_hashtags )
-  seedHBase( num_users, num_hashtags )
+  seedMongo( num_users, num_hashtags )
+  #seedHBase( num_users, num_hashtags )
   #seedDB2( num_users, num_hashtags )
   
 end

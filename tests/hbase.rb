@@ -6,7 +6,6 @@ require_relative '../seeds/generate.rb'
 
 class HBaseTest
   
-
   def initialize (num_users_requested, num_hashtags_requested, num_users, num_hashtags)
     config = YAML.load_file( @@path + '../config/db.yml' )['HBase']
     address = 'http://' + config['host'] + ':' + config['port'])
@@ -47,14 +46,13 @@ class HBaseTest
     #add 0-2 hashtags.  when adding hashtag
     rand(2) .times do 
   
-        @db.create_row('hastags', max_tag, Time.now.to_i, {:name => 'tag:body', :value => 'blahNewHashtag'})
-        @db.create_row('hastags', max_tag, Time.now.to_i, {:name => 'tag:tweet' + max_tweet.to_s, :value => max_tweet})
-        max_tag+=1
+      @db.create_row('hastags', max_tag, Time.now.to_i, {:name => 'tag:body', :value => 'blahNewHashtag'})
+      @db.create_row('hastags', max_tag, Time.now.to_i, {:name => 'tag:tweet' + max_tweet.to_s, :value => max_tweet})
+      max_tag+=1
         
     end
     
     return max_tag
-    
   end
   
   #params: hahstag id

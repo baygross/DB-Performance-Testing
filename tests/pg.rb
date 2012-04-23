@@ -17,7 +17,7 @@ class PGTest
            })
   end
 
-  #params: num_users/num_hashtags requested and total num_users/num_hashtags
+  #params: num_users and num_hashtags requested
   #returns object with user_ids and hashtags to be used in the next 3 functions
   def getTargets (num_users_requested, num_hashtags_requested)
 

@@ -20,10 +20,10 @@ require 'benchmark'
 #------------------------------------------------------------------------------
 def main
   
-  testSaddle( :pg )
+  #testSaddle( :pg )
   testSaddle( :mongo )
-  testSaddle( :hbase )
-  testSaddle( :db2 )
+  #testSaddle( :hbase )
+  #testSaddle( :db2 )
   
 end
 
