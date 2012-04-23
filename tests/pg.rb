@@ -2,7 +2,6 @@
 
 require 'pg'
 require 'YAML'
-require_relative 'generate.rb'
 
 class PGTest
 
@@ -12,7 +11,7 @@ class PGTest
             :host => config['host'],
             :port => config['port'],
             :user => config['user'],
-            :password => config['password']
+            :password => config['password'],
             :dbname => config['dbname']
            })
   end
@@ -38,29 +37,20 @@ class PGTest
   end
 
   #writes a tweet for the given user
-  def tweet (user_id)
-    tweet = Random.paragraphs(1)
-    if tweet.length <= 140
-      tweet = tweet.slice(0.. -2)
-    else
-      tweet = tweet.slice(0, 140)
-    end
+  # TODO: charlie wrap this into one query
+  def tweet ( user_id )
+    
+    #generate new tweet
+    body = "This is a new tweet being written to the DB!"
 
-    # TODO: Parse the return of this properly
-    new_id = @db.exec('INSERT INTO tweets(tweet, user_id) VALUES($1, $2)', [tweet, user_id])
-
+    new_id = @db.exec('INSERT INTO tweets(tweet, user_id) VALUES($1, $2) RETURNING id;', [body, user_id])
+    new_id = new_id[0][0].to_i
+    
     #random 0-2 hashtags per tweet
-    r=rand
-
-    #add one hastag to this tweet
-    if r < 2/3.to_f
+    rand(2).times do 
       @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [new_id, (rand*(max_hash+1-min_hash)+min_hash).floor])
     end
-
-    #add a second hashtag to this tweet
-    if r < 1/3.to_f
-      @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [new_id, (rand*(max_hash+1-min_hash)+min_hash).floor])
-    end
+    
   end
 
   #params: hashtag id
