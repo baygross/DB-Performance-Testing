@@ -5,35 +5,18 @@ class Generator
   #--Configure ---------------------------------------
 
   # App1 
-  def initialize
-    @num_hashtags = 10000   #10k
-    @num_users = 100000     #100k
-
-    @power_user = [100, 200]  #range of tweets
-    @new_user = [0, 25]     #range of tweets
-    @power_user_ratio = 0.5   #ratio of users that are 'power' 
+  def initialize( ops )
+    
+    #range of tweets for a power user
+    @power_user = ops[:power_user] || [100, 200]  
+    
+    #range of tweets for a normal user
+    @new_user = ops[:new_user] || [0, 25]     #range of tweets
+    
+    #ratio of users that are 'power users'
+    @power_user_ratio = ops[:power_user_ratio] || 0.5
+    
   end
-
-  # App2
-
-  #----Config Accessors---------------------------------
-
-  #Config Accessors
-  def num_hashtags
-    return @num_hashtags
-  end
-  def num_users
-    return @num_users
-  end
-  # def power_user
-  #    @power_user
-  #  end
-  #  def new_user
-  #    @new_user
-  #  end
-  #  def power_user_ratio
-  #    @power_user_ratio
-  #  end
 
   #-----Methods------------------------------------------
 
@@ -93,13 +76,9 @@ class Generator
       ret = ret.sample.capitalize + ret.sample.capitalize + ret.sample.capitalize
     end
 
-    #TODO: make this a single gsub regex
-    ret = ret.gsub(/[\'\"\.\?\!\, ]/, '')
+    ret.gsub(/[\'\"\.\?\!\, ]*/, '')
 
-    ret
   end
-
-  
 
   # generates a random tweet
   # and ensures there is no \n at end
@@ -111,7 +90,8 @@ class Generator
     else
       ret = ret.slice(0, 140)
     end
-
+    
+  end
 
 
 end

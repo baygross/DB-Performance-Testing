@@ -3,9 +3,6 @@ APP 1  BY Wednesday's class!!
 
 	PG 
 	- test clustering on user_id instead of primary
-	-	create PG database and add connection info to pg seed file
-	
-	- write test harness
 	
 	
 	MONGO
