@@ -8,6 +8,7 @@ def seedDB2(num_users, num_hashtags)
     #
     
     #connect to the db
+    config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
     conn = IBM_DB.connect("sample", "db2inst1", "mypassword")
     
     
