@@ -7,7 +7,7 @@ def seedPG( num_users, num_hashtags )
   
   puts "*********************************************"
   puts "Starting Seed of PostgreSQL"
-  
+  puts "- connecting to DB"
   #
   # Connect to PG database
   #
@@ -53,6 +53,7 @@ def seedPG( num_users, num_hashtags )
   #
   # Generate Users and Tweets
   #
+  puts "- generating users & tweets"
   num_users.times do |i|
     
     puts "- creating user: #{i}" if ( i%1 == 0)   
@@ -96,7 +97,7 @@ def seedPG( num_users, num_hashtags )
   min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
   max_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["max"].to_i
 
-  puts "Associating tweets with hashtags. Hold on..."
+  puts "- associating tweets with hashtags. Hold on..."
   #loop over all tweets
   for i in (min_tweet..max_tweet)
     
@@ -115,4 +116,6 @@ def seedPG( num_users, num_hashtags )
 
     #else no hashtags!
   end
+  
+  puts "-done!"
 end
