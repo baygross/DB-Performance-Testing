@@ -7,14 +7,15 @@ def seedMongo(num_users, num_hashtags)
   #
   # Connect to Mongo DB
   #
-  connection = Mongo::Connection.new("23.21.48.157", 27017)
-  db = connection.db("app1")
+  CONFIG = YAML.load_file(Rails.root.join('../config/db.yml'))['Mongo']
+  connection = Mongo::Connection.new(CONFIG['host'], CONFIG['port'])
+  @db = connection.db(CONFIG['db'])
 
 
   #
   # Create our collections
   #
-  Users = db.collection("users")
+  Users = @db.collection("users")
   # hashtags will be kept inside tweets inside users
   Users.create_index('fname')
   Users.create_index( 'tweets.hashtags' )

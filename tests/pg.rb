@@ -1,18 +1,20 @@
 #!/usr/bin/env ruby
 
 require 'pg'
+require 'YAML'
 require_relative 'generate.rb'
 
 class PGTest
 
   def initialize
-    @db = PGconn.open({ 
-      :host => '23.21.48.157',
-      :port =>  '5432',
-      :user =>  'postgres',
-      :password =>  'hereiam',
-      :dbname =>  'app1'
-    })
+    CONFIG = YAML.load_file(Rails.root.join('../config/db.yml'))['PG']
+    @db = PGdb.open({ 
+            :host => CONFIG['host'],
+            :port => CONFIG['port'],
+            :user => CONFIG['user'],
+            :password => CONFIG['password']
+            :dbname => CONFIG['dbname']
+           })
   end
 
   #params: num_users/num_hashtags requested and total num_users/num_hashtags

@@ -1,20 +1,23 @@
 #!/usr/bin/env ruby
 
 require 'stargate'
+require 'YAML'
 
 def seedHBase( num_users, num_hashtags )
 
   #
   # Connect to HBase DB
   #
-  db = Stargate::Client.new("http://23.21.48.157:8080")
+  CONFIG = YAML.load_file(Rails.root.join('../config/db.yml'))['HBase']
+  address = 'http://' + CONFIG['host'] + ':' + CONFIG['port'])
+  @db = Stargate::Client.new(Stargate::Client.new(address)
 
   #
   # Create our tables!
   #
-  users = db.create_table('users', 'info', 'tweets')
-  tweets = db.create_table('tweets', 'content')
-  hashtags = db.create_table('hashtags', 'tag')
+  users = @db.create_table('users', 'info', 'tweets')
+  tweets = @db.create_table('tweets', 'content')
+  hashtags = @db.create_table('hashtags', 'tag')
 
   #
   # Generate hashtags
@@ -25,7 +28,7 @@ def seedHBase( num_users, num_hashtags )
       hashtag = @Generate.twitter_hashtag
     
       #add hashtag to table
-      db.create_row('hashtags', tag_id, Time.now.to_i, {:name => 'tag:body', :value => hashtag})
+      @db.create_row('hashtags', tag_id, Time.now.to_i, {:name => 'tag:body', :value => hashtag})
       tag_id += 1
   end
 
@@ -40,28 +43,28 @@ def seedHBase( num_users, num_hashtags )
       user = @Generate.twitter_user
 
       #add that user
-      db.create_row('users', user_id, Time.now.to_i, {:name => 'info:fname', :value => user[:fname]})
-      db.create_row('users', user_id, Time.now.to_i, {:name => 'info:lname', :value => user[:lname]})
-      db.create_row('users', user_id, Time.now.to_i, {:name => 'info:bio', :value => user[:bio]})
+      @db.create_row('users', user_id, Time.now.to_i, {:name => 'info:fname', :value => user[:fname]})
+      @db.create_row('users', user_id, Time.now.to_i, {:name => 'info:lname', :value => user[:lname]})
+      @db.create_row('users', user_id, Time.now.to_i, {:name => 'info:bio', :value => user[:bio]})
 
       #add all of the user's tweets to the tweet table and user table
       tweets=Array.new
       user[:tweets].each do |tweet|
 
-          db.create_row('tweets', tweet_id, Time.now.to_i, {:name => 'content:body', :value => tweet})
-          db.create_row('users', user_id, Time.now.to_i, {:name => 'tweets:'+tweet_id.to_s, :value => tweet_id})
+          @db.create_row('tweets', tweet_id, Time.now.to_i, {:name => 'content:body', :value => tweet})
+          @db.create_row('users', user_id, Time.now.to_i, {:name => 'tweets:'+tweet_id.to_s, :value => tweet_id})
 
           #add 0-2 hashtags to each tweet
           r=rand        
         
           #add one hastag to this tweet
           if r < 1/3.to_f
-              db.create_row('hastags', (rand * tag_id).floor, Time.now.to_i, {:name => 'tag:tweet'+tweet_id.to_s, :value => tweet_id})
+              @db.create_row('hastags', (rand * tag_id).floor, Time.now.to_i, {:name => 'tag:tweet'+tweet_id.to_s, :value => tweet_id})
           end
 
           #add a second hashtag to this tweet
           if r < 2/3.to_f
-              db.create_row('hastags', (rand * tag_id).floor, Time.now.to_i, {:name => 'tag:tweet'+tweet_id.to_s, :value => tweet_id})
+              @db.create_row('hastags', (rand * tag_id).floor, Time.now.to_i, {:name => 'tag:tweet'+tweet_id.to_s, :value => tweet_id})
           end
 
           #else no hashtags!
