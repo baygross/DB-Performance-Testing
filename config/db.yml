@@ -1,0 +1,15 @@
+HBase:
+  host: 23.21.48.157
+  port: 8080
+
+PG:
+  host: 23.21.48.157
+  port: 5432
+  user: postgres
+  password: hereiam
+  dbname: app1
+
+Mongo: 
+  host: 23.21.48.157
+  port: 27017
+  db: app1

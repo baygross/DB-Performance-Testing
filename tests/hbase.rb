@@ -1,13 +1,15 @@
 #!/usr/bin/env ruby
 
 require 'stargate'
+require 'YAML'
 require_relative '../seeds/generate.rb'
-
 
 class HBaseTest
   
   def initialize (num_users_requested, num_hashtags_requested, num_users, num_hashtags)
-    @db = Stargate::Client.new( "http://ec2-23-22-57-68.compute-1.amazonaws.com:8080" )
+    CONFIG = YAML.load_file(Rails.root.join('../config/db.yml'))['HBase']
+    address = 'http://' + CONFIG['host'] + ':' + CONFIG['port'])
+    @db = Stargate::Client.new(Stargate::Client.new(address)
   end
   
   #params: num_users/num_hashtags requested and total num_users/num_hashtags
