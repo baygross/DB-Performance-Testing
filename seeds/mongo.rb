@@ -10,7 +10,7 @@ Generate = Generator.new()
 #
 # Connect to Mongo DB
 #
-connection = Mongo::Connection.new("localhost", 27017)
+connection = Mongo::Connection.new("23.21.48.157", 27017)
 db = connection.db("app1")
 
 #

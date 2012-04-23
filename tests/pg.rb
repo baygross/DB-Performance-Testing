@@ -9,12 +9,12 @@ class pg_tester
   
 	def initialize
 	  @db = PGconn.open({ 
-                :host => '',
-                :port =>  '',
-                :login =>  '',
-                :password =>  '',
-                :dbname =>  'app1'
-           })
+            :host => '23.21.48.157',
+            :port =>  '5432',
+            :user =>  'postgres',
+            :password =>  'hereiam',
+            :dbname =>  'app1'
+       })
 	end
 
   #params: num_users/num_hashtags requested and total num_users/num_hashtags
