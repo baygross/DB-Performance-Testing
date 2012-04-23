@@ -4,23 +4,27 @@ require 'pg'
 require 'YAML'
 
 def seedPG( num_users, num_hashtags )
-
+  
+  puts "*********************************************"
+  puts "Starting Seed of PostgreSQL"
+  puts "- connecting to DB"
   #
   # Connect to PG database
   #
-  CONFIG = YAML.load_file(Rails.root.join('../config/db.yml'))['PG']
-  @db = PGdb.open({ 
-        :host => CONFIG['host'],
-        :port => CONFIG['port'],
-        :user => CONFIG['user'],
-        :password => CONFIG['password']
-        :dbname => CONFIG['dbname']
+  config = YAML.load_file( @@path + '../config/db.yml' )['PG']
+  @db = PG.connect({ 
+        :host => config['host'],
+        :port => config['port'],
+        :user => config['user'],
+        :password => config['password'],
+        :dbname => config['dbname']
        })
 
   #
   # Create our tables!
   #
 
+  puts "- Dropping tables"
   #drop everything, if it's there
   @db.exec('
   						DROP TABLE IF EXISTS users;
@@ -28,7 +32,8 @@ def seedPG( num_users, num_hashtags )
   						DROP TABLE IF EXISTS hashtags;
   						DROP TABLE IF EXISTS hashtags_tweets;
   ')
-
+  
+  puts "- Creating tables"
   #create table for user that has first/last name and bio
   @db.exec('CREATE TABLE users(id SERIAL PRIMARY KEY, first_name VARCHAR(32), last_name VARCHAR(32), bio VARCHAR(140));')
 
@@ -48,53 +53,38 @@ def seedPG( num_users, num_hashtags )
   #
   # Generate Users and Tweets
   #
-  @db.exec('BEGIN')
-    num_users.times do |i|
+  puts "- generating users & tweets"
+  num_users.times do |i|
+    
+    puts "- creating user: #{i}" if ( i%1 == 0)   
+      
+    #get a new user from generate API
+    user = @Generate.twitter_user
 
-      #every 5000 iterations, commit to disk
-      if i%5000==0
-        @db.exec('COMMIT')
-        @db.exec('BEGIN')
-      end
-
-      #get a new user from generate API
-      user = @Generate.twitter_user
-
-      #add that user
-      @db.exec('INSERT INTO users(first_name, last_name, bio) VALUES ($1, $2, $3)', [user[:fname], user[:lname], user[:bio]])
-
-      #add all of the user's tweets
-      current_user = @db.exec("SELECT currval(pg_get_serial_sequence('users', 'id'));")
-      user[:tweets].each do |tweet|
-        @db.exec('INSERT INTO tweets(tweet, user_id) VALUES($1, $2)', [tweet, current_user])
-      end
+    #add that user
+    cid = @db.exec('INSERT INTO users(first_name, last_name, bio) VALUES ($1, $2, $3) RETURNING id;' , [user[:fname], user[:lname], user[:bio]])
+    cid = cid[0][0].to_i
+    
+    user[:tweets].each do |tweet|
+      @db.exec('INSERT INTO tweets(tweet, user_id) VALUES($1, $2)', [tweet, cid])
     end
-
-  #flush buffer
-  @db.exec('COMMIT')
+  end
 
 
   #
   #  Generate Hashtags
   #
-  @db.exec('BEGIN')
-    num_hashtags.times do |i|
+  num_hashtags.times do |i|
 
-      #every 5000 iterations, commit to disk
-      if i%5000==0
-        @db.exec('COMMIT')
-        @db.exec('BEGIN')
-      end
+    puts "- creating hashtag: #{i}" if ( i%1 == 0) 
+      
+    #get a hashtag from the Generate API class
+    hashtag = @Generate.twitter_hashtag
 
-      #get a hashtag from the Generate API class
-      hashtag = @Generate.twitter_hashtag
+    #add hashtag to table
+    @db.exec('INSERT INTO hashtags(hashtag) VALUES ($1)', [hashtag])
+  end
 
-      #add hashtag to table
-      @db.exec('INSERT INTO hashtags(hashtag) VALUES ($1)', [hashtag])
-    end
-
-  #flush buffer
-  @db.exec('COMMIT')
 
 
   #
@@ -102,29 +92,30 @@ def seedPG( num_users, num_hashtags )
   #
 
   # first lookup our tweet and hashtag ranges for fast bulk insertion!
-  min_tweet = @db.exec("SELECT MIN(id) FROM tweets;")
-  max_tweet = @db.exec("SELECT MAX(id) FROM tweets;")
-  min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")
-  max_hash = @db.exec("SELECT MIN(id) FROM hashtags;")
+  min_tweet = @db.exec("SELECT MIN(id) FROM tweets;")[0]["min"].to_i
+  max_tweet = @db.exec("SELECT MAX(id) FROM tweets;")[0]["max"].to_i
+  min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
+  max_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["max"].to_i
 
-  @db.exec('BEGIN')
-    #loop over all tweets
-    for i in (min_tweet..max_tweet)
+  puts "- associating tweets with hashtags. Hold on..."
+  #loop over all tweets
+  for i in (min_tweet..max_tweet)
+    
+    #random 0-2 hashtags per tweet
+    r=rand
 
-      #random 0-2 hashtags per tweet
-      r=rand
-
-      #add one hastag to this tweet
-      if r < 1/3.to_f
-        @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [i, (rand*(max_hash+1-min_hash)+min_hash).floor])
-      end
-
-      #add a second hashtag to this tweet
-      if r < 2/3.to_f
-        @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [i, (rand*(max_hash+1-min_hash)+min_hash).floor])
-      end
-
-      #else no hashtags!
+    #add one hastag to this tweet
+    if r < 1/3.to_f
+      @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [i, (rand*(max_hash+1-min_hash)+min_hash).floor])
     end
-  @db.exec('COMMIT')
+
+    #add a second hashtag to this tweet
+    if r < 2/3.to_f
+      @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [i, (rand*(max_hash+1-min_hash)+min_hash).floor])
+    end
+
+    #else no hashtags!
+  end
+  
+  puts "-done!"
 end

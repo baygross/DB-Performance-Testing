@@ -4,27 +4,31 @@ require 'mongo'
 
 def seedMongo(num_users, num_hashtags)
 
+  puts "*********************************************"
+  puts "Starting Seed of Mongo"
+  puts "- connecting to DB"
   #
   # Connect to Mongo DB
   #
-  CONFIG = YAML.load_file(Rails.root.join('../config/db.yml'))['Mongo']
-  connection = Mongo::Connection.new(CONFIG['host'], CONFIG['port'])
-  @db = connection.db(CONFIG['db'])
+  config = YAML.load_file( @@path + '../config/db.yml' )['Mongo']
+  connection = Mongo::Connection.new(config['host'], config['port'])
+  @db = connection.db(config['db'])
 
 
   #
   # Create our collections
   #
-  Users = @db.collection("users")
+  puts "- creating collections"
+  users = @db.collection("users")
   # hashtags will be kept inside tweets inside users
-  Users.create_index('fname')
-  Users.create_index( 'tweets.hashtags' )
+  users.create_index('fname')
+  users.create_index( 'tweets.hashtags' )
 
 
   #
   # Generate the users collection w/ embeded tweets & hashtags!
   #
-
+  puts "- generating user docs"
   user_block = []
   num_users.times do |i|
   
@@ -33,12 +37,15 @@ def seedMongo(num_users, num_hashtags)
   
     # batch insert every 500 users
     if i%500==0
-      Users.insert( user_block )
+      puts "- inserting 500 users docs"
+      users.insert( user_block )
       user_block = []
     end
 
   end
-
+  
+  puts "- flushing final user docs to DB..."
   #flush
-  Users.insert( user_block )
+  users.insert( user_block )
+  puts "- done!"
 end
