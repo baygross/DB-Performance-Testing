@@ -20,6 +20,7 @@ class MongoTest
         users = Array.new
         ids = Array.new
         hashes = Array.new
+        rand_hashes = Array.new
         
         #create array of all ids
         @col.find.each do |a|
@@ -32,14 +33,20 @@ class MongoTest
             end
         end
         
-        #choose random vals from this array
+        #choose random vals from array of users
         num_users_requested.times.each do |i|
             users.push(ids[rand(ids.count)])
         end
         
+        hashes=hashes.uniq      #make sure we are sampling from unique hashes
         
-        #choose hashtags at random
+        #choose random hashtags from array of hashtags
+        num_hashtags_requested.times.each do |i|
+            rand_hashes.push(hashes[rand(hashes.count)])
+        end
         
+        # return our final hash
+        {:users => users, :hashtags => rand_hashes}
     end
     
     
@@ -62,6 +69,8 @@ class MongoTest
         @col.update({"_id" => user_id}, {"$set" => {"tweets" => new_tweets}})
     end
     
+    
+    #return all tweets that contain hashtag
     def lookup_hashtag (hashtag)
         
     end
