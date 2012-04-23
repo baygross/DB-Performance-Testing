@@ -1,16 +1,13 @@
 #!/usr/bin/env ruby
 
 require 'mongo'
-require_relative '../seeds/generate.rb'
-
 
 class MongoTest
 
   def initialize
     config = YAML.load_file( @@path + '../config/db.yml' )['Mongo']
     connection = Mongo::Connection.new(config['host'], config['port'])
-    @db = connection.db(config['db'])
-    @col = db['users']
+    @db = connection.db( config['db'] )
   end
 
   #params: num_users and num_hashtags requested
@@ -18,15 +15,15 @@ class MongoTest
   def getTargets (num_users_requested, num_hashtags_requested)
             
     rseed = rand()
-    users = @db.users.find( { random : { $gte : rseed } } ).limit(num_users_requested)
-    if !users
-      users = @db.users.find( { random : { $lte : rseed } } ).limit(num_users_requested)
+    users = @db['users'].find( 'random' => { '$gte' => rseed } ).limit(num_users_requested)
+    if !users || users.count < num_users_requested
+      users = @db['users'].find( 'random' => { '$lte' => rseed } ).limit(num_users_requested)
     end
-    users.map!{|u| u['_id']}
+    users = users.to_a.map{|u| u['_id']}
   
     #oh boy, grab every single hashtag
-    hashtags = @db.users.find.collect{ |u| u.tweets.collect(&:hashtags).flatten }.flatten.uniq
-    hashtags.sample( num_hashtags_requested )
+    hashtags = @db['users'].find.collect{ |u| u['tweets'].collect{|t| t['hashtags']}.flatten }.flatten
+    hashtags.uniq.sample( num_hashtags_requested )
 
     # return our final hash
     {:users => users, :hashtags => hashtags}
@@ -34,22 +31,24 @@ class MongoTest
 
 
   #user_id writes a tweet
-  def Tweet (user_id)
-    new_tweets = (@col.find("_id" => user_id).to_a[0])['tweets']
+  def tweet ( user_id )
+    #get current tweets for user
+    user_tweets = (@db['users'].find("_id" => user_id).to_a[0])['tweets']
 
     #generate new tweet
-    Generate = Generator.new()
-    tweet = Generate.randTweet
-    hashtags=Array.new
-
-    #add 0-2 hashtags.  when adding hashtag
-    rand(2) .times do 
-      hashtags.push('newHashTag')
+    body = "This is a new tweet being written to the DB!"
+    hashtags = []
+    
+    #add 0-2 hashtags.
+    rand(2).times do 
+      hashtags.push( randHashtag )
     end
-    new_tweets.push({:body => tweet, hashtag:hashtags})
+    
+    #add new tweet to user document
+    user_tweets.push({:body => body, :hashtags => hashtags})
 
-    #update collection
-    @col.update({"_id" => user_id}, {"$set" => {"tweets" => new_tweets}})
+    #update document
+    @db['users'].update({"_id" => user_id}, {"$set" => {"tweets" => user_tweets}})
   end
 
 
@@ -60,6 +59,15 @@ class MongoTest
 
   #lookup all of the tweets for a specific user
   def lookup_user (user_id)
-    @col.find("_id" => user_id).to_a[0])['tweets']
+    result = @db['users'].find("_id" => user_id)
+    user = result.to_a[0]
+
+    if !user
+      p "error finding user: " + user_id.to_s
+    else
+      return user['tweets']
+    end
+    
   end
+  
 end

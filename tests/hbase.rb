@@ -38,8 +38,8 @@ class HBaseTest
   #returns new hashtags written
   #NOTE: on call, needs to update max_tweet_id and possibly max_tag
   def tweet (user_id, max_tweet, max_tag)
-    Generate = Generator.new()
-    tweet = Generate.randTweet
+    @generate = Generator.new()
+    tweet = @generate.randTweet
     @db.create_row('users', user_id, Time.now.to_i, {:name => 'info:tweet', :value => max_tweet})
     @db.create_row('tweets', max_tweet, Time.now.to_i, {:name => 'content:body', :value => tweet})
       

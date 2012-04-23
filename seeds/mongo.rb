@@ -38,7 +38,7 @@ def seedMongo(num_users, num_hashtags)
     #grab a new user obj w/ embeded tweets + hashtags
     user = @Generate.twitter_user( { :with_hashtags => true } )
     #add a random index on it for selecting on later
-    user[:random] = Math.random()
+    user[:random] = rand()
     #and add to our buffer
     user_block << user
   
