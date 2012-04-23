@@ -6,15 +6,16 @@ require_relative '../seeds/generate.rb'
 
 class HBaseTest
   
+
   def initialize (num_users_requested, num_hashtags_requested, num_users, num_hashtags)
     config = YAML.load_file( @@path + '../config/db.yml' )['HBase']
     address = 'http://' + config['host'] + ':' + config['port'])
-    @db = Stargate::Client.new(Stargate::Client.new(address)
+    @db = Stargate::Client.new( address )
   end
   
   #params: num_users/num_hashtags requested and total num_users/num_hashtags
   #returns object with user_ids and hashtags to be used in the next 3 functions
-  def getTargets
+  def getTargets (num_users_requested, num_hashtags_requested, num_users, num_hashtags)
     #arrays for users and hashes to be returned
     users = Array.new
     hash = Array.new
@@ -43,19 +44,12 @@ class HBaseTest
     @db.create_row('users', user_id, Time.now.to_i, {:name => 'info:tweet', :value => max_tweet})
     @db.create_row('tweets', max_tweet, Time.now.to_i, {:name => 'content:body', :value => tweet})
       
-    #add 0-2 hashtags.  when adding hashtag, make it new 10% of time   
+    #add 0-2 hashtags.  when adding hashtag
     rand(2) .times do 
   
-        # 30% of time create new hashtag
-        if rand(3) < 1
-            @db.create_row('hastags', max_tag, Time.now.to_i, {:name => 'tag:body', :value => 'blahNewHashtag'})
-            @db.create_row('hastags', max_tag, Time.now.to_i, {:name => 'tag:tweet' + max_tweet.to_s, :value => max_tweet})
-            max_tag+=1
-        # otherwise, use an existing hashtag
-        else
-            tag = (rand * max_tag).floor
-            @db.create_row('hastags', tag, Time.now.to_i, {:name => 'tag:tweet' + max_tweet.to_s, :value => max_tweet})
-        end
+        @db.create_row('hastags', max_tag, Time.now.to_i, {:name => 'tag:body', :value => 'blahNewHashtag'})
+        @db.create_row('hastags', max_tag, Time.now.to_i, {:name => 'tag:tweet' + max_tweet.to_s, :value => max_tweet})
+        max_tag+=1
         
     end
     
@@ -68,14 +62,18 @@ class HBaseTest
   def lookup_hashtag (hashtag)
     tag = @db.show_row('hashtags', hashtag)
     
-    #do we want to return the actual values or just run the queries?
+    #
+    #TODO: see what tag returns and find the rows of corresponding tweets
+    #
   end
   
   #params: user_id
   #returns all tweets from a specific user
   def lookup_user (user_id)
-    row = @db.show_row('users', tweets)
+    row = @db.show_row('users', user_id)
     
-    #do we want to return the actual values or just run the queries?
+    #
+    #TODO: see what row returns and find the rows of corresponding tweets
+    #
   end
 end
