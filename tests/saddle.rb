@@ -4,6 +4,7 @@ require_relative 'db2.rb'
 require_relative 'hbase.rb'
 require_relative 'mongo.rb'
 require_relative 'pg.rb'
+require_relative 'threadPool.rb'
 require 'benchmark'
 
 #------- Config Variables ----------------------------------------------------
@@ -13,6 +14,8 @@ require 'benchmark'
 @user_posts_a_new_tweet = 200
 @return_tweets_for_a_hashtag = 200
 
+#and how big is our thread pool?
+@pool_size = 40
 
 #------------------------------------------------------------------------------
 def main
@@ -51,6 +54,10 @@ def testSaddle( dbslug )
   
   #=> targets = { :users =[],  :hashtags => [] }
   
+
+     
+  #initialize thread pool
+  p = Pool.new(@pool_size)
   
   ## Benchmarks begins here:----------------------------------------
   puts "---------- " + dbslug.to_s + " -------------\n"
@@ -59,21 +66,29 @@ def testSaddle( dbslug )
     #lookup user tweets
     @return_tweets_for_a_user.times do |i|
       u = targets[:users].pop
-      @client.lookup_user( u )
+      p.schedule do
+        @client.lookup_user( u )
+      end
     end
   
     #post a new tweet
     @user_posts_a_new_tweet.times do |i|
       u = targets[:users].pop
-      @client.tweet( u )
+      p.schedule do
+        @client.tweet( u )
+      end
     end
     
     #lookup tweets by hashtag
     @return_tweets_for_a_hashtag.times do |i|
       h = targets[:hashtags].pop
-      @client.lookup_hashtag( h )
+      p.schedule do
+        @client.lookup_hashtag( h )
+      end
     end
     
+    #wait for threads to finish
+    p.shutdown
   }
   ##  Benchmark ends here: -------------------------------------------
 end
