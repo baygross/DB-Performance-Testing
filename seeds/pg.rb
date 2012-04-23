@@ -63,27 +63,30 @@ def seedPG( num_users, num_hashtags )
     #add that user
     cid = @db.exec('INSERT INTO users(first_name, last_name, bio) VALUES ($1, $2, $3) RETURNING id;' , [user[:fname], user[:lname], user[:bio]])
     cid = cid[0][0].to_i
-    
-    user[:tweets].each do |tweet|
-      @db.exec('INSERT INTO tweets(tweet, user_id) VALUES($1, $2)', [tweet, cid])
+
+    user[:tweets].map! do |tweet|
+      sprintf("('%s',%s)",tweet.gsub(/'/, ""),cid)
     end
+    
+    @db.exec(sprintf('INSERT INTO tweets(tweet, user_id) VALUES %s', user[:tweets].join(",")))
   end
 
 
   #
   #  Generate Hashtags
   #
+  s = Time.now
+  puts "- creating #{num_hashtags} hashtags"
+  hashtags = []
   num_hashtags.times do |i|
-
-    puts "- creating hashtag: #{i}" if ( i%1 == 0) 
-      
     #get a hashtag from the Generate API class
-    hashtag = @Generate.twitter_hashtag
-
-    #add hashtag to table
-    @db.exec('INSERT INTO hashtags(hashtag) VALUES ($1)', [hashtag])
+    hashtags << "('" + @Generate.twitter_hashtag + "')"
   end
-
+  
+  #Save them all at once
+  @db.exec('INSERT INTO hashtags(hashtag) VALUES ' + hashtags.join(","))
+  
+	puts (Time.now - s).to_s
 
 
   #
@@ -97,6 +100,8 @@ def seedPG( num_users, num_hashtags )
   max_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["max"].to_i
 
   puts "Associating tweets with hashtags. Hold on..."
+  s = Time.now
+  assocs = []
   #loop over all tweets
   for i in (min_tweet..max_tweet)
     
@@ -105,14 +110,20 @@ def seedPG( num_users, num_hashtags )
 
     #add one hastag to this tweet
     if r < 1/3.to_f
-      @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [i, (rand*(max_hash+1-min_hash)+min_hash).floor])
+      assocs << [i, (rand*(max_hash+1-min_hash)+min_hash).floor]
     end
 
     #add a second hashtag to this tweet
     if r < 2/3.to_f
-      @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [i, (rand*(max_hash+1-min_hash)+min_hash).floor])
+      assocs << [i, (rand*(max_hash+1-min_hash)+min_hash).floor]
     end
 
     #else no hashtags!
   end
+  
+  assocs.map!{|set| sprintf("(%s,%s)",set[0],set[1])}
+  #save them all en masse
+  @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ' + assocs.join(","))
+  
+  puts (Time.now - s).to_s
 end
