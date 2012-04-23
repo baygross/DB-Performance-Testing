@@ -8,10 +8,10 @@ Generate = Generator.new()
 # Initialize our connection to PG database
 #
 conn = PGconn.open({ 
-            :host => '',
-            :port =>  '',
-            :login =>  '',
-            :password =>  '',
+            :host => '23.21.48.157',
+            :port =>  '5432',
+            :user =>  'postgres',
+            :password =>  'hereiam',
             :dbname =>  'app1'
        })
 
@@ -19,7 +19,15 @@ conn = PGconn.open({
 #
 # Create our tables!
 #
-# TODO: can we make this indempotent?
+
+#drop everything, if it's there
+conn.exec('
+						DROP TABLE IF EXISTS users;
+						DROP TABLE IF EXISTS tweets;
+						DROP TABLE IF EXISTS hashtags;
+						DROP TABLE IF EXISTS hashtags_tweets;
+')
+
 #create table for user that has first/last name and bio
 conn.exec('CREATE TABLE users(id SERIAL PRIMARY KEY, first_name VARCHAR(32), last_name VARCHAR(32), bio VARCHAR(140));')
 
