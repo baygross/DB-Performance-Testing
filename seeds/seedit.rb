@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'pathname'
 require_relative 'generate.rb'
 require_relative 'db2.rb'
 require_relative 'hbase.rb'
