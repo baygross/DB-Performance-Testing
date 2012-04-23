@@ -9,7 +9,7 @@ class HBaseTest
   def initialize (num_users_requested, num_hashtags_requested, num_users, num_hashtags)
     config = YAML.load_file( @@path + '../config/db.yml' )['HBase']
     address = 'http://' + config['host'] + ':' + config['port'])
-    @db = Stargate::Client.new(Stargate::Client.new(address)
+    @db = Stargate::Client.new( address )
   end
   
   #params: num_users/num_hashtags requested and total num_users/num_hashtags
