@@ -46,7 +46,7 @@ def seedDB2(num_users, num_hashtags)
     # Generate Users and Tweets
     #
     num_users.times do |i|
-        puts "- creating user: #{i}" if ( i%1 == 0)   
+        puts "- creating user: #{i}" if ( i%500 == 0)   
           
         #get a new user from generate API
         user = @Generate.twitter_user

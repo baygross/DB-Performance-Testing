@@ -23,9 +23,7 @@ def seedPG( num_users, num_hashtags )
   #
   # Create our tables!
   #
-
   puts "- Dropping tables"
-  #drop everything, if it's there
   @db.exec('
   						DROP TABLE IF EXISTS users;
   						DROP TABLE IF EXISTS tweets;
@@ -55,7 +53,7 @@ def seedPG( num_users, num_hashtags )
   #
   num_users.times do |i|
     
-    puts "- creating user: #{i}" if ( i%1 == 0)   
+    puts "- creating user: #{i}" if ( i%500 == 0)   
       
     #get a new user from generate API
     user = @Generate.twitter_user
@@ -64,10 +62,12 @@ def seedPG( num_users, num_hashtags )
     cid = @db.exec('INSERT INTO users(first_name, last_name, bio) VALUES ($1, $2, $3) RETURNING id;' , [user[:fname], user[:lname], user[:bio]])
     cid = cid[0]['id'].to_i
 
+    #format for raw SQL injection
     user[:tweets].map! do |tweet|
       sprintf("('%s',%s)",tweet.gsub(/'/, ""),cid)
     end
     
+    #generate and execute insertion query
     q = sprintf('INSERT INTO tweets(tweet, user_id) VALUES %s', user[:tweets].join(","))
     @db.exec( q )
   end
@@ -76,24 +76,23 @@ def seedPG( num_users, num_hashtags )
   #
   #  Generate Hashtags
   #
-  s = Time.now
   puts "- creating #{num_hashtags} hashtags"
   hashtags = []
   num_hashtags.times do |i|
+    puts "- creating hashtag: #{i}" if ( i%500 == 0)  
+     
     #get a hashtag from the Generate API class
     hashtags << "('" + @Generate.twitter_hashtag + "')"
   end
   
+  puts "- saving all hashtags"  
   #Save them all at once
   @db.exec('INSERT INTO hashtags(hashtag) VALUES ' + hashtags.join(","))
-  
-	puts (Time.now - s).to_s
 
 
   #
   # Associate Hashtags and Tweets
   #
-
   # first lookup our tweet and hashtag ranges for fast bulk insertion!
   min_tweet = @db.exec("SELECT MIN(id) FROM tweets;")[0]["min"].to_i
   max_tweet = @db.exec("SELECT MAX(id) FROM tweets;")[0]["max"].to_i
@@ -101,7 +100,6 @@ def seedPG( num_users, num_hashtags )
   max_hash = @db.exec("SELECT Max(id) FROM hashtags;")[0]["max"].to_i
   
   puts "Associating tweets with hashtags. Hold on..."
-  s = Time.now
   assocs = []
   #loop over all tweets
   for i in (min_tweet..max_tweet)
@@ -113,10 +111,11 @@ def seedPG( num_users, num_hashtags )
     
   end
   
+  #format data for SQL insertion
   assocs.map!{|set| sprintf("(%s,%s)",set[0],set[1])}
   q = 'INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ' + assocs.join(",")
-  #save them all en masse
+  
+  #and then save them all en masse
   @db.exec( q )
   
-  puts (Time.now - s).to_s
 end

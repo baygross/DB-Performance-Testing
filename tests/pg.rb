@@ -5,6 +5,7 @@ require 'YAML'
 
 class PGTest
 
+  #connect to the DB and set instance variables
   def initialize
     config = YAML.load_file( @@path + '../config/db.yml' )['PG']
     @db = PG.connect({ 
@@ -26,10 +27,10 @@ class PGTest
     min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
     max_hash = @db.exec("SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
     
-    #users
+    #randomly select some users
     users = (min_user..max_user).to_a.sample(num_users_requested)
 
-    #hashtags
+    #randomly select some hashtags
     hashtags = (min_hash..max_hash).to_a.sample(num_users_requested)
 
     #return our targets
@@ -40,7 +41,7 @@ class PGTest
   # TODO: charlie wrap this into one query
   def tweet ( user_id )
     
-    #generate new tweet
+    #generate a new tweet
     body = "This is a new tweet being written to the DB!"
     new_id = @db.exec('INSERT INTO tweets(tweet, user_id) VALUES($1, $2) RETURNING id;', [body, user_id])
     new_id = new_id[0][0].to_i
@@ -54,20 +55,19 @@ class PGTest
       @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [new_id, rand(max_hash)+min_hash])
     end
     
+    debug "wrote a tweet to user: " + user_id.to_s
   end
 
-  #params: hashtag id
   #returns all tweets with a given hashtag (incl assoc user)
   def lookup_hashtag (hashtag)
     # TODO: If bad performance, we might do a seondary query instead of a join
     resp = @db.exec('SELECT * from tweets t INNER JOIN hashtags_tweets ht ON ht.tweet_id = t.id INNER JOIN users u ON t.user_id = u.id WHERE hashtag_id = $1', [hashtag])
-    p 'hash id: ' + hashtag.to_s + " had " + resp.count.to_s
+    debug 'hash id: ' + hashtag.to_s + " had " + resp.count.to_s
   end
 
-  #params: user_id
   #returns all tweets from a specific user
   def lookup_user (user_id)
     resp = @db.exec('SELECT * from tweets t WHERE user_id = $1', [user_id])
-    p 'user id: ' + user_id.to_s + " had " + resp.count.to_s
+    debug 'user id: ' + user_id.to_s + " had " + resp.count.to_s
   end
 end

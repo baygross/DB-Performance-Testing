@@ -38,7 +38,7 @@ def seedHBase( num_users, num_hashtags )
   puts "- generating hashtags"
   tag_id = 0
   num_hashtags.times do |i|
-    puts "- creating hashtag: #{i}" if ( i%1 == 0)   
+    puts "- creating hashtag: #{i}" if ( i%500 == 0)   
     #get a hashtag from the Generate API class
     hashtag = @Generate.twitter_hashtag
   
@@ -54,7 +54,7 @@ def seedHBase( num_users, num_hashtags )
   user_id = 0
   tweet_id = 0
   num_users.times do |i|
-    puts "- creating user: #{i}" if ( i%1 == 0)   
+    puts "- creating user: #{i}" if ( i%500 == 0)   
     #get a new user from generate API
     user = @Generate.twitter_user
 

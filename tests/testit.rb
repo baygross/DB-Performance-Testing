@@ -25,7 +25,7 @@ def main
   @@path = Pathname(__FILE__).dirname.realpath
   
   testSaddle( :pg )
-  #testSaddle( :mongo )
+  testSaddle( :mongo )
   #testSaddle( :hbase )
   #testSaddle( :db2 )
   
@@ -101,6 +101,11 @@ end
 # rando hashtags of alpha characters
 def randHashtag()
   (0...10).map{ ('a'..'z').to_a[rand(26)] }.join
+end
+
+#debug print function, turn on or off
+def debug( msg )
+  p msg
 end
 
 #run it

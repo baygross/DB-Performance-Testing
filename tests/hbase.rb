@@ -52,6 +52,7 @@ class HBaseTest
         
     end
     
+    debug "wrote a tweet to user: " + user_id.to_s
     return max_tag
   end
   

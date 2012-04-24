@@ -46,15 +46,18 @@ class MongoTest
     
     #add new tweet to user document
     user_tweets.push({:body => body, :hashtags => hashtags})
-
+    
     #update document
     @db['users'].update({"_id" => user_id}, {"$set" => {"tweets" => user_tweets}})
+    
+    debug "wrote a tweet to user: " + user_id.to_s
   end
 
 
   #return all tweets that contain hashtag
+  #TODO: Charlie
   def lookup_hashtag (hashtag)
-
+    debug "hashtag id: " + hashtag.to_s + " had " 
   end
 
   #lookup all of the tweets for a specific user
@@ -65,6 +68,7 @@ class MongoTest
     if !user
       p "error finding user: " + user_id.to_s
     else
+      debug 'user id: ' + user_id.to_s + " had " + user['tweets'].count.to_s
       return user['tweets']
     end
     
