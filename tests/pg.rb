@@ -50,19 +50,19 @@ class PGTest
       @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [new_id, rand(@max_hash - @min_hash) + @min_hash])
     end
     
-    debug "wrote a tweet to user: " + user_id.to_s
+    debug "wrote new tweet for user: " + user_id.to_s
   end
 
   #returns all tweets with a given hashtag (incl assoc user)
   def lookup_hashtag (hashtag)
     # TODO: If bad performance, we might do a seondary query instead of a join
     resp = @db.exec('SELECT * from tweets t INNER JOIN hashtags_tweets ht ON ht.tweet_id = t.id INNER JOIN users u ON t.user_id = u.id WHERE hashtag_id = $1', [hashtag])
-    debug 'hash id: ' + hashtag.to_s + " had " + resp.count.to_s
+    debug 'hashtag: ' + hashtag.to_s + " had " + resp.count.to_s + " tweets"
   end
 
   #returns all tweets from a specific user
   def lookup_user (user_id)
     resp = @db.exec('SELECT * from tweets t WHERE user_id = $1', [user_id])
-    debug 'user id: ' + user_id.to_s + " had " + resp.count.to_s
+    debug 'user: ' + user_id.to_s + " had " + resp.count.to_s + " tweets"
   end
 end

@@ -11,6 +11,7 @@ def seedPG( num_users, num_hashtags )
   #
   # Connect to PG database
   #
+  puts "- connecting to DB"
   config = YAML.load_file( @@path + '../config/db.yml' )['PG']
   @db = PG.connect({ 
         :host => config['host'],
@@ -23,7 +24,7 @@ def seedPG( num_users, num_hashtags )
   #
   # Create our tables!
   #
-  puts "- Dropping tables"
+  puts "- dropping tables"
   @db.exec('
   						DROP TABLE IF EXISTS users;
   						DROP TABLE IF EXISTS tweets;
@@ -31,7 +32,7 @@ def seedPG( num_users, num_hashtags )
   						DROP TABLE IF EXISTS hashtags_tweets;
   ')
   
-  puts "- Creating tables"
+  puts "- creating tables"
   #create table for user that has first/last name and bio
   @db.exec('CREATE TABLE users(id SERIAL PRIMARY KEY, first_name VARCHAR(32), last_name VARCHAR(32), bio VARCHAR(140));')
 
@@ -51,9 +52,10 @@ def seedPG( num_users, num_hashtags )
   #
   # Generate Users and Tweets
   #
+  puts "- creating #{num_users} users with hashtags"
   num_users.times do |i|
     
-    puts "- creating user: #{i}" if ( i%500 == 0)   
+    puts "- just saved user: #{i}" if i%500 == 0  
       
     #get a new user from generate API
     user = @Generate.twitter_user
@@ -69,7 +71,7 @@ def seedPG( num_users, num_hashtags )
     
     #generate and execute insertion query
     q = sprintf('INSERT INTO tweets(tweet, user_id) VALUES %s', user[:tweets].join(","))
-    @db.exec( q )
+    @db.exec( q ) if user[:tweets].length > 0
   end
 
 
@@ -78,9 +80,7 @@ def seedPG( num_users, num_hashtags )
   #
   puts "- creating #{num_hashtags} hashtags"
   hashtags = []
-  num_hashtags.times do |i|
-    puts "- creating hashtag: #{i}" if ( i%500 == 0)  
-     
+  num_hashtags.times do |i|    
     #get a hashtag from the Generate API class
     hashtags << "('" + @Generate.twitter_hashtag + "')"
   end
@@ -99,7 +99,7 @@ def seedPG( num_users, num_hashtags )
   min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
   max_hash = @db.exec("SELECT Max(id) FROM hashtags;")[0]["max"].to_i
   
-  puts "Associating tweets with hashtags. Hold on..."
+  puts "- associating tweets with hashtags. Hold on..."
   assocs = []
   #loop over all tweets
   for i in (min_tweet..max_tweet)
