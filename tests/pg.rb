@@ -47,7 +47,8 @@ class PGTest
     
     #insert 0-2 hashtags per tweet
     rand(2).times do 
-      @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [new_id, rand(@max_hash - @min_hash) + @min_hash])
+      new_tag = rand(@max_hash - @min_hash + 1) + @min_hash
+      @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [new_id, new_tag])
     end
     
     debug "wrote new tweet for user: " + user_id.to_s

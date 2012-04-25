@@ -52,10 +52,10 @@ def seedPG( num_users, num_hashtags )
   #
   # Generate Users and Tweets
   #
-  puts "- creating #{num_users} users with hashtags"
+  puts "- creating #{num_users} users with tweets"
   num_users.times do |i|
     
-    puts "- just saved user: #{i}" if i%500 == 0  
+    puts "- just saved user: #{i}" if ( i%500 == 0 && i != 0 ) 
       
     #get a new user from generate API
     user = @Generate.twitter_user
@@ -116,6 +116,6 @@ def seedPG( num_users, num_hashtags )
   q = 'INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ' + assocs.join(",")
   
   #and then save them all en masse
-  @db.exec( q )
+  @db.exec( q ) if assocs.length > 0
   
 end

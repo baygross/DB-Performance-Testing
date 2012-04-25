@@ -3,7 +3,7 @@
 require 'benchmark'
 require 'pathname'
 #require_relative 'db2.rb'
-#require_relative 'hbase.rb'
+require_relative 'hbase.rb'
 require_relative 'mongo.rb'
 require_relative 'pg.rb'
 require_relative 'threadPool.rb'
@@ -24,9 +24,9 @@ def main
   #get local path as a global var
   @@path = Pathname(__FILE__).dirname.realpath
   
-  testSaddle( :pg )
-  testSaddle( :mongo )
-  #testSaddle( :hbase )
+  #testSaddle( :pg )
+  #testSaddle( :mongo )
+  testSaddle( :hbase )
   #testSaddle( :db2 )
   
 end
