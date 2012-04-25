@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'pg'
-require 'YAML'
+require 'yaml'
 
 def seedPG( num_users, num_hashtags )
   
