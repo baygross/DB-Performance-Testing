@@ -28,10 +28,10 @@ class PGTest
     @max_hash = @db.exec("SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
     
     #randomly select some users
-    users = (min_user..max_user).to_a.sample(num_users_requested)
+    users = (@min_user..@max_user).to_a.sample(num_users_requested)
 
     #randomly select some hashtags
-    hashtags = (min_hash..max_hash).to_a.sample(num_users_requested)
+    hashtags = (@min_hash..@max_hash).to_a.sample(num_users_requested)
 
     #return our targets
     {:users => users, :hashtags => hashtags}
