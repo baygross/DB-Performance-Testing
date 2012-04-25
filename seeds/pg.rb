@@ -106,7 +106,7 @@ def seedPG( num_users, num_hashtags )
     
     #add 0-2 hashtags per tweet
     rand(2).times do
-      assocs << [ i, rand(max_hash)+min_hash ]
+      assocs << [ i, rand(max_hash - min_hash)+min_hash ]
     end
     
   end

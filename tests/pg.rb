@@ -22,10 +22,10 @@ class PGTest
   def getTargets (num_users_requested, num_hashtags_requested)
 
     #Get bounds, assume no delete    
-    min_user = @db.exec("SELECT MIN(id) FROM users;")[0]["min"].to_i
-    max_user = @db.exec("SELECT MAX(id) FROM users;")[0]["max"].to_i
-    min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
-    max_hash = @db.exec("SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
+    @min_user = @db.exec("SELECT MIN(id) FROM users;")[0]["min"].to_i
+    @max_user = @db.exec("SELECT MAX(id) FROM users;")[0]["max"].to_i
+    @min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
+    @max_hash = @db.exec("SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
     
     #randomly select some users
     users = (min_user..max_user).to_a.sample(num_users_requested)
@@ -38,7 +38,6 @@ class PGTest
   end
 
   #writes a tweet for the given user
-  # TODO: charlie wrap this into one query
   def tweet ( user_id )
     
     #generate a new tweet
@@ -46,13 +45,9 @@ class PGTest
     new_id = @db.exec('INSERT INTO tweets(tweet, user_id) VALUES($1, $2) RETURNING id;', [body, user_id])
     new_id = new_id[0][0].to_i
     
-    #get hashtag range
-    min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
-    max_hash = @db.exec("SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
-    
     #insert 0-2 hashtags per tweet
     rand(2).times do 
-      @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [new_id, rand(max_hash)+min_hash])
+      @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [new_id, rand(@max_hash - @min_hash) + @min_hash])
     end
     
     debug "wrote a tweet to user: " + user_id.to_s
