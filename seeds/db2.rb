@@ -9,7 +9,8 @@ def seedDB2(num_users, num_hashtags)
     
     #connect to the db
     config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
-    conn = IBM_DB.connect("sample", "db2inst1", "mypassword")
+    conn = IBM_DB.connect("test", "db2inst1", "hereiam")
+   	conn = IBM_DB.connect("DATABASE=test;HOSTNAME=localhost;PORT=50000;PROTOCOL=TCPIP;UID=db2inst1;PWD=hereiam;","","")
     
     
     #
@@ -26,20 +27,21 @@ def seedDB2(num_users, num_hashtags)
     ')
 
     puts "- Creating tables"
+    
     #create table for user that has first/last name and bio
-    IBM_DB.exec(conn, 'CREATE TABLE users(id SERIAL PRIMARY KEY, first_name VARCHAR(32), last_name VARCHAR(32), bio VARCHAR(140));')
-
+    IBM_DB.exec(conn, 'CREATE TABLE users(id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, first_name VARCHAR(32), last_name VARCHAR(32), bio VARCHAR(140));')
+		
     #create table for tweets that has tweet and id of user
-    IBM_DB.exec(conn, 'CREATE TABLE tweets(id SERIAL PRIMARY KEY, tweet VARCHAR(140), user_id INTEGER);')
-    IBM_DB.exec(conn, 'CREATE INDEX user_index ON tweets (user_id);')
+    IBM_DB.exec(conn, 'CREATE TABLE tweets(id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, tweet VARCHAR(140), user_id INTEGER);')
+    IBM_DB.exec(conn, 'CREATE INDEX user_index ON tweets (user_id);') #TODO: play with clustering key on userid?
 
     #create a table for hashtags
-    IBM_DB.exec(conn, 'CREATE TABLE hashtags(id SERIAL PRIMARY KEY, hashtag VARCHAR(140));')
+    IBM_DB.exec(conn, 'CREATE TABLE hashtags(id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, hashtag VARCHAR(140));')
 
     #create a join table for hashtags and tweets
-    IBM_DB.exec(conn, 'CREATE TABLE hashtags_tweets(hashtag_id Integer, tweet_id Integer);')
+    IBM_DB.exec(conn, 'CREATE TABLE hashtags_tweets(hashtag_id INTEGER, tweet_id Integer);')
     IBM_DB.exec(conn, 'CREATE INDEX ht_tweet ON hashtags_tweets (tweet_id);')
-    IBM_DB.exec(conn, 'CREATE INDEX ht_hashtag ON hashtags_tweets (hashtag_id);')
+    IBM_DB.exec(conn, 'CREATE INDEX ht_hashtag ON hashtags_tweets (hashtag_id) CLUSTER;')
 
 
     #
