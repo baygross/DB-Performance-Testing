@@ -22,10 +22,10 @@ def seedDB2( num_users, num_hashtags )
   #
   puts "- Dropping tables"
   IBM_DB.exec(conn, '
-  DROP TABLE IF EXISTS users;
-  DROP TABLE IF EXISTS tweets;
-  DROP TABLE IF EXISTS hashtags;
-  DROP TABLE IF EXISTS hashtags_tweets;
+  DROP TABLE users;
+  DROP TABLE tweets;
+  DROP TABLE hashtags;
+  DROP TABLE hashtags_tweets;
   ')
 
   puts "- Creating tables" 
@@ -51,13 +51,15 @@ def seedDB2( num_users, num_hashtags )
   num_users.times do |i|
     
     #log every 500
-    puts "- creating user: #{i}" if ( i%500 == 0 && i != 0 )    
+    puts "- creating user: #{i}" if ( i%500 == 0 && i != 0 ) 
 
     #get a new user from generate API
     user = @Generate.twitter_user
 
     #add that user
-    cid = IBM_DB.get_last_serial_value(conn)
+    r = IBM_DB.exec(conn, "INSERT INTO users(first_name, last_name, bio) VALUES ('#{user[:fname]}', '#{user[:lname]}', '#{user[:bio].gsub(/'/,'')}')")
+    next if(!r)
+    cid = getSimpleValue(conn, "SELECT IDENTITY_VAL_LOCAL() FROM users").to_i
 
     #format the user's tweets for batch insertion
     user[:tweets].map! do |tweet|
