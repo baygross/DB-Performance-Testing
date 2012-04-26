@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'pg'
-require 'YAML'
+require 'yaml'
 
 class PGTest
 
@@ -28,10 +28,10 @@ class PGTest
     @max_hash = @db.exec("SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
     
     #randomly select some users
-    users = (min_user..max_user).to_a.sample(num_users_requested)
+    users = (@min_user..@max_user).to_a.sample(num_users_requested)
 
     #randomly select some hashtags
-    hashtags = (min_hash..max_hash).to_a.sample(num_users_requested)
+    hashtags = (@min_hash..@max_hash).to_a.sample(num_users_requested)
 
     #return our targets
     {:users => users, :hashtags => hashtags}
@@ -47,22 +47,23 @@ class PGTest
     
     #insert 0-2 hashtags per tweet
     rand(2).times do 
-      @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [new_id, rand(@max_hash - @min_hash) + @min_hash])
+      new_tag = rand(@max_hash - @min_hash + 1) + @min_hash
+      @db.exec('INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ($1, $2)', [new_id, new_tag])
     end
     
-    debug "wrote a tweet to user: " + user_id.to_s
+    debug "wrote new tweet for user: " + user_id.to_s
   end
 
   #returns all tweets with a given hashtag (incl assoc user)
   def lookup_hashtag (hashtag)
     # TODO: If bad performance, we might do a seondary query instead of a join
     resp = @db.exec('SELECT * from tweets t INNER JOIN hashtags_tweets ht ON ht.tweet_id = t.id INNER JOIN users u ON t.user_id = u.id WHERE hashtag_id = $1', [hashtag])
-    debug 'hash id: ' + hashtag.to_s + " had " + resp.count.to_s
+    debug 'hashtag: ' + hashtag.to_s + " had " + resp.count.to_s + " tweets"
   end
 
   #returns all tweets from a specific user
   def lookup_user (user_id)
     resp = @db.exec('SELECT * from tweets t WHERE user_id = $1', [user_id])
-    debug 'user id: ' + user_id.to_s + " had " + resp.count.to_s
+    debug 'user: ' + user_id.to_s + " had " + resp.count.to_s + " tweets"
   end
 end

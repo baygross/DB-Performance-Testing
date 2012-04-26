@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'stargate'
-require 'YAML'
+require 'yaml'
 
 def seedHBase( num_users, num_hashtags )
 
@@ -13,7 +13,6 @@ def seedHBase( num_users, num_hashtags )
   #
   config = YAML.load_file( @@path + '../config/db.yml' )['HBase']
   address = 'http://' + config['host'] + ':' + config['port'].to_s
-  p address
   @db = Stargate::Client.new( address )
 
 
@@ -21,7 +20,7 @@ def seedHBase( num_users, num_hashtags )
   #Get rid of existing tables
   #
   tables = @db.list_tables.each do |table|
-      @db.delete_table(table)
+    @db.delete_table(table.name)
   end
 
   #
@@ -29,65 +28,39 @@ def seedHBase( num_users, num_hashtags )
   #
   puts "- creating our tables"
   users = @db.create_table('users', 'info', 'tweets')
-  tweets = @db.create_table('tweets', 'content')
-  hashtags = @db.create_table('hashtags', 'tag')
+  hashtags = @db.create_table('hashtags', 'meta', 'tweets')
 
-  #
-  # Generate hashtags
-  #
-  puts "- generating hashtags"
-  tag_id = 0
-  num_hashtags.times do |i|
-    puts "- creating hashtag: #{i}" if ( i%500 == 0)   
-    #get a hashtag from the Generate API class
-    hashtag = @Generate.twitter_hashtag
-  
-    #add hashtag to table
-    @db.create_row('hashtags', tag_id, Time.now.to_i, {:name => 'tag:body', :value => hashtag})
-    tag_id += 1
-  end
 
   # 
-  # Generate Users and Tweets
+  # Generate Users and Tweets 
   #
-  puts "- generating users & tweets"
-  user_id = 0
-  tweet_id = 0
-  num_users.times do |i|
-    puts "- creating user: #{i}" if ( i%500 == 0)   
-    #get a new user from generate API
-    user = @Generate.twitter_user
+  puts "- generating #{num_users} users & their tweets with hashtags"
+  num_users.times do |user_i|
 
-    #add that user
-    @db.create_row('users', user_id, Time.now.to_i, {:name => 'info:fname', :value => user[:fname]})
-    @db.create_row('users', user_id, Time.now.to_i, {:name => 'info:lname', :value => user[:lname]})
-    @db.create_row('users', user_id, Time.now.to_i, {:name => 'info:bio', :value => user[:bio]})
+    #log every 500
+    puts "- creating user: #{i}" if ( user_i%500 == 0 && user_i != 0) 
 
-    #add all of the user's tweets to the tweet table and user table
-    tweets=Array.new
-    user[:tweets].each do |tweet|
+    #get a new user from the generate API
+    user = @Generate.twitter_user({ :with_hashtags => true })
 
-        @db.create_row('tweets', tweet_id, Time.now.to_i, {:name => 'content:body', :value => tweet})
-        @db.create_row('users', user_id, Time.now.to_i, {:name => 'tweets:'+tweet_id.to_s, :value => tweet_id})
+    #add that user's attributes to columns
+    @db.create_row('users', user_i.to_s, Time.now.to_i, {:name => 'info:fname', :value => user[:fname]})
+    @db.create_row('users', user_i.to_s, Time.now.to_i, {:name => 'info:lname', :value => user[:lname]})
+    @db.create_row('users', user_i.to_s, Time.now.to_i, {:name => 'info:bio', :value => user[:bio]})
 
-        #add 0-2 hashtags to each tweet
-        r=rand        
+    #then iterate over the users's tweets
+    user[:tweets].each_with_index do |tweet, tweet_i|
+
+      #save each tweet to the user table
+      @db.create_row('users', user_i.to_s, Time.now.to_i, {:name => 'tweets:'+tweet_i.to_s, :value => tweet[:body]})
       
-        #add one hastag to this tweet
-        if r < 1/3.to_f
-            @db.create_row('hastags', (rand * tag_id).floor, Time.now.to_i, {:name => 'tag:tweet'+tweet_id.to_s, :value => tweet_id})
-        end
+      #and save each tweet to any associated hashtag tables
+      tweet[:hashtags].each do |ht|
+        @db.create_row('hashtags', ht, Time.now.to_i, {:name => 'tweets:'+user_i.to_s + '_' + tweet_i.to_s, :value => tweet})
+        @db.create_row('hashtags', ht, Time.now.to_i, {:name => 'meta:flag', :value => 1})
+      end
 
-        #add a second hashtag to this tweet
-        if r < 2/3.to_f
-            @db.create_row('hastags', (rand * tag_id).floor, Time.now.to_i, {:name => 'tag:tweet'+tweet_id.to_s, :value => tweet_id})
-        end
-
-        #else no hashtags!
-      
-        tweet_id += 1
     end
-    user_id += 1
   end
   puts "- done!"
 end

@@ -1,0 +1,100 @@
+@db['users'].find( {'tweets.hashtag' => 'blah'}).count
+@db['users'].findOne()
+@db['users'].findOne({})
+@db['users'].find({}).to_a[0].tweets
+@db['users'].find({}).to_a[0].tweets.first
+@db['users'].find({}).to_a[0].tweets[0]
+a = b
+    require 'mongo'
+    config = YAML.load_file( @@path + '../config/db.yml' )['Mongo']
+    connection = Mongo::Connection.new( config['host'], config['port'], :pool_size => pool_size )
+    @db = connection.db( config['db'] )
+@db['users'].find({}).limit(1)
+@db['users'].find({}).limit(1).to_a[0].tweets[0]
+@db['users'].find({}).limit(1).to_a[0]['tweets[0]
+]
+]'
+'
+@db['users'].find({}).limit(1).to_a[0]['tweets'][0]
+@db['users'].find({}).limit(1).offset(3)to_a[0]['tweets'][0]
+@db['users'].find({}).limit(1).offset(3).to_a[0]['tweets'][0]
+@db['users'].find({}).limit(1).Offset(3).to_a[0]['tweets'][0]
+@db['users'].find({}).limit(1).skip(3).to_a[0]['tweets'][0]
+@db['users'].find({'tweets.hashtag' => 'JusticeElitElit'})
+@db['users'].find({'tweets.hashtag' => 'JusticeElitElit'}).count
+@db['users'].find({'tweets.hashtags' => 'JusticeElitElit'}).count
+@db['users'].find({'tweets.hashtags' => 'JusticeElitElit'}).to_a
+rand()
+require 'net/http'
+Net::HTTP.get_response(  'http://google.com' )
+Net::HTTP.get_response(  URI.parse( 'http://google.com') )
+Net::HTTP.get_response(  URI.parse( 'http://baygross.com') )
+Net::HTTP.get_response(  URI.parse( 'https://docs.google.com/spreadsheet/formResponse?formkey=dGNkSTZVd3N0UHJzRlRtMGhsNXBmWUE6MQ&ifq&entry.0.single=abe-melek.bekele%40yale.edu&entry.2.single=DC&entry.3.single=nathan%20hardesty-dyck&entry.4.single=mabel%20ogakwu&pageNumber=0&backupCache=&submit=Submit ') )
+Net::HTTP.get_response(  URI.parse( 'https://docs.google.com/spreadsheet/formResponse?formkey=dGNkSTZVd3N0UHJzRlRtMGhsNXBmWUE6MQ&ifq&entry.0.single=abe-melek.bekele%40yale.edu&entry.2.single=DC&entry.3.single=nathan%20hardesty-dyck&entry.4.single=mabel%20ogakwu&pageNumber=0&backupCache=&submit=Submit') )
+clear
+a = ['a', 'b', 'c', 'd']
+a.each_with_index do |x, y| puts x , y end
+  require 'mongo'
+  require 'pg'
+    require 'yaml'
+    @@path = '/Users/bay/Dropbox/Programming/YaleCS/438/DB-Performance-Testing/seeds/'
+    pool_size = 10
+require 'stargate'
+require 'yaml'
+config = YAML.load_file( @@path + '../config/db.yml' )['HBase']
+  address = 'http://' + config['host'] + ':' + config['port'].to_s
+  @db = Stargate::Client.new( address )
+@db.show_row('hashtags', hashtag)
+@db.show_table('hashtags').first
+@db.show_table('hashtags').to_a
+@db.show_table('hashtags').methods.column_families
+@db.show_table('hashtags').to_yaml
+@db.show_table('hashtags').inspect
+@db.show_row('tweets', '1')
+@db.show_row('tweets', '2')
+@db.show_row('tweets', '3')
+@db.show_row('hashtags', '1')
+@db.show_row('hashtags', '1').each{|a| p a}
+@db.show_row('hashtags', '1').methods
+@db.show_row('hashtags', '1').columns
+@db.show_row('hashtags', '1').columns.each{|col| p col
+}
+@db.show_row('hashtags', '1').columns.each{|col| p col.name}
+@db.create_row('users', 'bay', Time.now.to_i, {:name => 'info:test', :value => "test1"})
+@db.create_row('users', 'bay', Time.now.to_i, {:name => 'info:test', :value => "test2"})
+@db.show_row('users', 'bay').columns.each{|col| p col.name}
+@db.open_scanner("hashtags")
+rows.size
+rows.first.name
+rows[2].name
+rows[3].name
+rows[4].name
+rows = @db.get_rows(scanner, 'a')
+rows = @db.get_rows(scanner, nil)
+rows = @db.get_rows(scanner)
+scanner = @db.open_scanner("hashtags")
+rows = @db.get_rows(scanner, '')
+    scanner = @db.open_scanner("hashtags")
+    hts = @db.get_rows( scanner )
+    hts.sample(num_hashtags_requested).map!{&:name}
+hts.sample(num_hashtags_requested).map!(:&name}
+hts.sample(num_hashtags_requested).map!{:&name}
+hts.sample(num_hashtags_requested).map!{&:name}
+num_hashtags_requested = 100
+hts.sample(num_hashtags_requested).map!(&:name)
+@db.show_table('hashtags')
+@db.show_table('hashtags').methods
+@db.show_table('hashtags').columns
+@db.show_table('hashtags').column_familes
+@db.show_table('hashtags').column_families.methods
+@db.show_table('hashtags').column_families.json
+@db.show_table('hashtags').column_families.all
+@db.show_table('hashtags').column_families
+@db.show_table('hashtags').column_families.first.all
+@db.show_table('hashtags').column_families.first.methods
+@db.show_table('hashtags').column_families.first.name
+@db.show_table('hashtags').column_families.first.instance_variables
+@db = Stargate::Client.new( address )
+@db.show_table('users').column_families.first.instance_variables
+@db.show_tables
+exit

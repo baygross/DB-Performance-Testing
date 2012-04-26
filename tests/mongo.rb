@@ -4,9 +4,9 @@ require 'mongo'
 
 class MongoTest
 
-  def initialize
+  def initialize( pool_size = 10 )
     config = YAML.load_file( @@path + '../config/db.yml' )['Mongo']
-    connection = Mongo::Connection.new(config['host'], config['port'])
+    connection = Mongo::Connection.new( config['host'], config['port'], :pool_size => pool_size )
     @db = connection.db( config['db'] )
   end
 
@@ -50,14 +50,21 @@ class MongoTest
     #update document
     @db['users'].update({"_id" => user_id}, {"$set" => {"tweets" => user_tweets}})
     
-    debug "wrote a tweet to user: " + user_id.to_s
+    debug "wrote new tweet for user: " + user_id.to_s
   end
 
 
   #return all tweets that contain hashtag
   #TODO: Charlie
   def lookup_hashtag (hashtag)
-    debug "hashtag id: " + hashtag.to_s + " had " 
+    # result = @db['users'].aggregate(
+    #   { '$match' => { "tweets.hashtag" => hashtag } },             # filter parent documents
+    #   { '$unwind' => '$tweets' },                               # unwind the embedded docs for filtering
+    #   { '$match' => { "tweets.hashtag" => hashtag} },             # filter subdocs
+    #   { '$group' => { '_id' => "$_id", 'task' => {'$push'  => "$tweets"} } }  # group subdocs back into array in parent doc
+    # );
+    results = @db['users'].find({'tweets.hashtags' => hashtag})
+    debug "hashtag: \'#" + hashtag.to_s + "\' had " + 0.to_s + " tweets."
   end
 
   #lookup all of the tweets for a specific user
@@ -66,9 +73,9 @@ class MongoTest
     user = result.to_a[0]
 
     if !user
-      p "error finding user: " + user_id.to_s
+      puts "error finding user: " + user_id.to_s
     else
-      debug 'user id: ' + user_id.to_s + " had " + user['tweets'].count.to_s
+      debug 'user: ' + user_id.to_s + " had " + user['tweets'].count.to_s + " tweets."
       return user['tweets']
     end
     
