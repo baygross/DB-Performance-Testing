@@ -63,19 +63,21 @@ class Generator
   #generates a random hashtag for app1
   #hashtags can (randomly) be 1,2 or 3 words long
   def twitter_hashtag
-
-    r= rand
-    text = Random.paragraphs(1)
-    text = text.split  
-
-    #hashtags are 1-3 words stuck together
-    ret = ''
-    ( rand(3) + 1 ).times do 
-      ret += text.sample.capitalize
-    end
-   
-    ret.gsub(/[\'\"\.\?\!\, ]*/, '')
-
+    
+    begin
+      text = Random.paragraphs(1)
+      text = text.split  
+    
+      #hashtags are 1-3 words stuck together
+      ret = ''
+      ( rand(3) + 1 ).times do 
+        ret += text.sample.capitalize
+      end
+       
+      ret = ret.gsub(/[\'\"\.\?\!\,\-\_ ]*/, '')
+    end while ret.length < 4
+    
+    return ret
   end
 
   # generates a random tweet

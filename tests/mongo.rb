@@ -73,7 +73,7 @@ class MongoTest
     user = result.to_a[0]
 
     if !user
-      p "error finding user: " + user_id.to_s
+      puts "error finding user: " + user_id.to_s
     else
       debug 'user: ' + user_id.to_s + " had " + user['tweets'].count.to_s + " tweets."
       return user['tweets']

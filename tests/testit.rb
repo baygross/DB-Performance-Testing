@@ -16,7 +16,7 @@ require_relative 'threadPool.rb'
 @return_tweets_for_a_hashtag = 200
 
 #and how big is our thread pool?
-@pool_size = 40
+@pool_size = 10
 
 #------------------------------------------------------------------------------
 def main
@@ -60,14 +60,14 @@ def testSaddle( dbslug )
   
   #initialize thread pool
   puts "- initializing thread pool of size #{@pool_size}..."
-  p = Pool.new(@pool_size)
+  tpool = Pool.new(@pool_size)
 
   #generate a jobs list and randomly sort it
   jobs = []
   jobs += Array.new( @return_tweets_for_a_user, :user_lookup )
   jobs += Array.new( @return_tweets_for_a_hashtag, :hash_lookup )
   jobs += Array.new( @user_posts_a_new_tweet, :new_tweet )
-  #jobs = jobs.sort{ rand }
+  jobs = jobs.sort{ rand }
 
   ## Benchmarks begins here:----------------------------------------
   puts "- starting benchmark now!"
@@ -82,21 +82,21 @@ def testSaddle( dbslug )
       #lookup user tweets    
       when :user_lookup     
         u = targets[:users].pop
-        p.schedule do
+        tpool.schedule do
           @client.lookup_user( u )
         end       
 
       #lookup tweets by hashtag
       when :hash_lookup
         h = targets[:hashtags].pop
-        p.schedule do
+        tpool.schedule do
           @client.lookup_hashtag( h )
         end
         
       #post a new tweet 
       when :new_tweet
         u = targets[:users].pop
-        p.schedule do
+        tpool.schedule do
           @client.tweet( u )
         end
       end
@@ -104,7 +104,7 @@ def testSaddle( dbslug )
     end
       
     #then wait for threads to finish
-    p.shutdown
+    tpool.shutdown
   }
   ##  Benchmark ends here: -------------------------------------------
 end
@@ -118,7 +118,7 @@ end
 
 #debug print function, turn on or off
 def debug( msg )
-  #puts msg
+  puts msg
 end
 
 #run it

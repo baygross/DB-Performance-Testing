@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'ibm_db'
-require 'YAML'
+require 'yaml'
 
 class PGTest
 
