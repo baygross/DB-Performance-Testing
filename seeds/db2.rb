@@ -11,7 +11,7 @@ def seedDB2( num_users, num_hashtags )
   #
   # Connect to DB2 database
   #
-  puts "- connecting to DB"
+  debug "connecting to DB"
   #TODO: this connection syntax is probably bad
   #config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
   conn = IBM_DB.connect("DATABASE=test;HOSTNAME=localhost;PORT=50000;PROTOCOL=TCPIP;UID=db2inst1;PWD=hereiam;","","")
@@ -20,7 +20,7 @@ def seedDB2( num_users, num_hashtags )
   #
   # Create our tables!
   #
-  puts "- Dropping tables"
+  debug "Dropping tables"
   IBM_DB.exec(conn, '
   DROP TABLE users;
   DROP TABLE tweets;
@@ -28,7 +28,7 @@ def seedDB2( num_users, num_hashtags )
   DROP TABLE hashtags_tweets;
   ')
 
-  puts "- Creating tables" 
+  debug "Creating tables" 
   #create table for user that has first/last name and bio
   IBM_DB.exec(conn, 'CREATE TABLE users(id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, first_name VARCHAR(32), last_name VARCHAR(32), bio VARCHAR(140));')
   #create table for tweets that has tweet and id of user
@@ -37,7 +37,7 @@ def seedDB2( num_users, num_hashtags )
   #create a table for hashtags
   IBM_DB.exec(conn, 'CREATE TABLE hashtags(id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, hashtag VARCHAR(140));')
 
-  puts "- ensuring indexes"
+  debug "ensuring indexes"
   #create a join table for hashtags and tweets
   IBM_DB.exec(conn, 'CREATE TABLE hashtags_tweets(hashtag_id INTEGER, tweet_id Integer);')
   IBM_DB.exec(conn, 'CREATE INDEX ht_tweet ON hashtags_tweets (tweet_id);')
@@ -47,11 +47,11 @@ def seedDB2( num_users, num_hashtags )
   #
   # Generate Users and Tweets
   #
-  puts "- generating #{num_users} users and their tweets"
+  debug "generating #{num_users} users and their tweets"
   num_users.times do |i|
     
     #log every 500
-    puts "- creating user: #{i}" if ( i%500 == 0 && i != 0 ) 
+    debug "creating user: #{i}" if ( i%500 == 0 && i != 0 ) 
 
     #get a new user from generate API
     user = @Generate.twitter_user
@@ -75,7 +75,7 @@ def seedDB2( num_users, num_hashtags )
   #
   #  Generate Hashtags
   #
-  puts "- creating #{num_hashtags} hashtags"
+  debug "creating #{num_hashtags} hashtags"
   hashtags = []
   num_hashtags.times do |i|
     #get a hashtag from the Generate API class
@@ -83,7 +83,7 @@ def seedDB2( num_users, num_hashtags )
   end
 
   #Save them all at once
-  puts "- saving all hashtags in bulk"
+  debug "saving all hashtags in bulk"
   q = 'INSERT INTO hashtags(hashtag) VALUES ' + hashtags.join(",")
   IBM_DB.exec(conn, q) if hashtags.length > 0
 
@@ -98,7 +98,7 @@ def seedDB2( num_users, num_hashtags )
   min_hash = getSimpleValue(conn, "SELECT MIN(id) FROM hashtags;")
   max_hash = getSimpleValue(conn, "SELECT MAX(id) FROM hashtags;")
 
-  puts "- associating tweets with hashtags. Hold on..."
+  debug "associating tweets with hashtags. Hold on..."
 
   assocs = []
   #loop over all tweets
@@ -118,6 +118,7 @@ def seedDB2( num_users, num_hashtags )
   q = 'INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ' + assocs.join(",")
   IBM_DB.exec(conn, q) if assocs.length > 0
 
+  debug "done!"
 end
 
 def getSimpleValue(conn, sql_statement)

@@ -11,7 +11,7 @@ def seedPG( num_users, num_hashtags )
   #
   # Connect to PG database
   #
-  puts "- connecting to DB"
+  debug "connecting to DB"
   config = YAML.load_file( @@path + '../config/db.yml' )['PG']
   @db = PG.connect({ 
         :host => config['host'],
@@ -24,7 +24,7 @@ def seedPG( num_users, num_hashtags )
   #
   # Create our tables!
   #
-  puts "- dropping tables"
+  debug "dropping tables"
   @db.exec('
   						DROP TABLE IF EXISTS users;
   						DROP TABLE IF EXISTS tweets;
@@ -32,7 +32,7 @@ def seedPG( num_users, num_hashtags )
   						DROP TABLE IF EXISTS hashtags_tweets;
   ')
   
-  puts "- creating tables"
+  debug "creating tables"
   #create table for user that has first/last name and bio
   @db.exec('CREATE TABLE users(id SERIAL PRIMARY KEY, first_name VARCHAR(32), last_name VARCHAR(32), bio VARCHAR(140));')
 
@@ -52,10 +52,10 @@ def seedPG( num_users, num_hashtags )
   #
   # Generate Users and Tweets
   #
-  puts "- creating #{num_users} users with tweets"
+  debug "creating #{num_users} users with tweets"
   num_users.times do |i|
     
-    puts "- just saved user: #{i}" if ( i%500 == 0 && i != 0 ) 
+    debug "just saved user: #{i}" if ( i%500 == 0 && i != 0 ) 
       
     #get a new user from generate API
     user = @Generate.twitter_user
@@ -78,14 +78,14 @@ def seedPG( num_users, num_hashtags )
   #
   #  Generate Hashtags
   #
-  puts "- creating #{num_hashtags} hashtags"
+  debug "creating #{num_hashtags} hashtags"
   hashtags = []
   num_hashtags.times do |i|    
     #get a hashtag from the Generate API class
     hashtags << "('" + @Generate.twitter_hashtag + "')"
   end
   
-  puts "- saving all hashtags"  
+  debug "saving all hashtags"  
   #Save them all at once
   @db.exec('INSERT INTO hashtags(hashtag) VALUES ' + hashtags.join(","))
 
@@ -99,7 +99,7 @@ def seedPG( num_users, num_hashtags )
   min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
   max_hash = @db.exec("SELECT Max(id) FROM hashtags;")[0]["max"].to_i
   
-  puts "- associating tweets with hashtags. Hold on..."
+  debug "associating tweets with hashtags. Hold on..."
   assocs = []
   #loop over all tweets
   for i in (min_tweet..max_tweet)
@@ -117,5 +117,5 @@ def seedPG( num_users, num_hashtags )
   
   #and then save them all en masse
   @db.exec( q ) if assocs.length > 0
-  
+  debug "done!"
 end

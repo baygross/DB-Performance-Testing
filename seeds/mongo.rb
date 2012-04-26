@@ -6,7 +6,7 @@ def seedMongo(num_users, num_hashtags)
 
   puts "*********************************************"
   puts "Starting Seed of Mongo"
-  puts "- connecting to DB"
+  debug "connecting to DB"
   #
   # Connect to Mongo DB
   #
@@ -18,11 +18,11 @@ def seedMongo(num_users, num_hashtags)
   #
   # Create our collections
   #
-  puts "- creating collections"
+  debug "creating collections"
   users = @db.collection("users")
-  puts "- removing existing docs"
+  debug "removing existing docs"
   users.remove({})
-  puts "- ensuring new indexes"
+  debug "ensuring new indexes"
   users.create_index('fname')
   users.create_index('random') #we use this index to find() randomly
   users.create_index( 'tweets.hashtags' )
@@ -31,7 +31,7 @@ def seedMongo(num_users, num_hashtags)
   #
   # Generate the users collection w/ embeded tweets & hashtags!
   #
-  puts "- generating user docs"
+  debug "generating user docs"
   user_block = []
   num_users.times do |i|
   
@@ -44,15 +44,15 @@ def seedMongo(num_users, num_hashtags)
   
     # batch insert every 500 users
     if (i+1)%500==0
-      puts "- inserting block of 500 users docs"
+      debug "inserting block of 500 users docs"
       users.insert( user_block )
       user_block = []
     end
 
   end
   
-  puts "- flushing final user docs to DB..."
+  debug "flushing final user docs to DB..."
   #flush
   users.insert( user_block )
-  puts "- done!"
+  debug "done!"
 end

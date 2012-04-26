@@ -7,7 +7,7 @@ def seedHBase( num_users, num_hashtags )
 
   puts "*********************************************"
   puts "Starting Seed of HBase"
-  puts "- connecting to DB"
+  debug "connecting to DB"
   #
   # Connect to HBase DB
   #
@@ -26,7 +26,7 @@ def seedHBase( num_users, num_hashtags )
   #
   # Create our tables!
   #
-  puts "- creating our tables"
+  debug "creating our tables"
   users = @db.create_table('users', 'info', 'tweets')
   hashtags = @db.create_table('hashtags', 'meta', 'tweets')
 
@@ -34,33 +34,40 @@ def seedHBase( num_users, num_hashtags )
   # 
   # Generate Users and Tweets 
   #
-  puts "- generating #{num_users} users & their tweets with hashtags"
+  debug "generating #{num_users} users & their tweets with hashtags"
   num_users.times do |user_i|
 
     #log every 500
-    puts "- creating user: #{i}" if ( user_i%500 == 0 && user_i != 0) 
+    debug "creating user: #{user_i}" if ( user_i%500 == 0 && user_i != 0) 
 
     #get a new user from the generate API
     user = @Generate.twitter_user({ :with_hashtags => true })
 
     #add that user's attributes to columns
-    @db.create_row('users', user_i.to_s, Time.now.to_i, {:name => 'info:fname', :value => user[:fname]})
-    @db.create_row('users', user_i.to_s, Time.now.to_i, {:name => 'info:lname', :value => user[:lname]})
-    @db.create_row('users', user_i.to_s, Time.now.to_i, {:name => 'info:bio', :value => user[:bio]})
+    user_cols = [ {:name => 'info:fname', :value => user[:fname]},
+                  {:name => 'info:lname', :value => user[:lname]},
+                  {:name => 'info:bio', :value => user[:bio]}
+                ]
 
     #then iterate over the users's tweets
     user[:tweets].each_with_index do |tweet, tweet_i|
-
-      #save each tweet to the user table
-      @db.create_row('users', user_i.to_s, Time.now.to_i, {:name => 'tweets:'+tweet_i.to_s, :value => tweet[:body]})
       
-      #and save each tweet to any associated hashtag tables
+      #store each tweet for bulk insert
+      user_cols << {:name => 'tweets:'+tweet_i.to_s, :value => tweet[:body]}
+      
+      #save each tweet to any associated hashtag tables now
       tweet[:hashtags].each do |ht|
-        @db.create_row('hashtags', ht, Time.now.to_i, {:name => 'tweets:'+user_i.to_s + '_' + tweet_i.to_s, :value => tweet})
-        @db.create_row('hashtags', ht, Time.now.to_i, {:name => 'meta:flag', :value => 1})
+        cols = [ {:name => 'meta:flag',  :value => 1}, 
+                 {:name => 'tweets:'+user_i.to_s+'_' + tweet_i.to_s, :value => tweet}
+               ]
+        @db.create_row('hashtags', ht, Time.now.to_i, cols)
       end
-
+      
     end
+    
+    #bulk insert user hash into user row
+    @db.create_row('users', user_i.to_s, Time.now.to_i, user_cols)
+    
   end
-  puts "- done!"
+  debug "done!"
 end
