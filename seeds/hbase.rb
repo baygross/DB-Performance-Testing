@@ -13,7 +13,7 @@ def seedHBase( num_users, num_hashtags )
   #
   config = YAML.load_file( @@path + '../config/db.yml' )['HBase']
   address = 'http://' + config['host'] + ':' + config['port'].to_s
-  @db = Stargate::Client.new( address )
+  @db = Stargate::Client.new( address, {:timeout => 15000} )
 
 
   #
@@ -63,7 +63,7 @@ def seedHBase( num_users, num_hashtags )
         begin
         	@db.create_row('hashtags', ht, Time.now.to_i, cols)
         rescue
-		    	@db = Stargate::Client.new( address )
+		    	@db = Stargate::Client.new( address, {:timeout => 15000} )
 		    	@db.create_row('hashtags', ht, Time.now.to_i, cols)
         end
       end
@@ -74,7 +74,7 @@ def seedHBase( num_users, num_hashtags )
     begin
     	@db.create_row('users', user_i.to_s, Time.now.to_i, user_cols)
     rescue
-    	@db = Stargate::Client.new( address )
+    	@db = Stargate::Client.new( address, {:timeout => 15000} )
     	@db.create_row('users', user_i.to_s, Time.now.to_i, user_cols)
     end
     
