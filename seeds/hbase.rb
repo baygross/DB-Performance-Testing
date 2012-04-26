@@ -60,13 +60,23 @@ def seedHBase( num_users, num_hashtags )
         cols = [ {:name => 'meta:flag',  :value => 1}, 
                  {:name => 'tweets:'+user_i.to_s+'_' + tweet_i.to_s, :value => tweet}
                ]
-        @db.create_row('hashtags', ht, Time.now.to_i, cols)
+        begin
+        	@db.create_row('hashtags', ht, Time.now.to_i, cols)
+        rescue
+		    	@db = Stargate::Client.new( address )
+		    	@db.create_row('hashtags', ht, Time.now.to_i, cols)
+        end
       end
       
     end
     
     #bulk insert user hash into user row
-    @db.create_row('users', user_i.to_s, Time.now.to_i, user_cols)
+    begin
+    	@db.create_row('users', user_i.to_s, Time.now.to_i, user_cols)
+    rescue
+    	@db = Stargate::Client.new( address )
+    	@db.create_row('users', user_i.to_s, Time.now.to_i, user_cols)
+    end
     
   end
   debug "done!"
