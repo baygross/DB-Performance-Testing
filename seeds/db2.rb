@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'ibm_db'
+require 'yaml'
 
 def seedDB2( num_users, num_hashtags )
   
@@ -56,8 +57,7 @@ def seedDB2( num_users, num_hashtags )
     user = @Generate.twitter_user
 
     #add that user
-    cid = IBM_DB.exec(conn, 'INSERT INTO users(first_name, last_name, bio) VALUES (#{user[:fname]}, #{user[:lname]}, #{user[:bio]}) RETURNING id;')
-    cid = cid[0][0].to_i
+    cid = IBM_DB.get_last_serial_value(conn)
 
     #format the user's tweets for batch insertion
     user[:tweets].map! do |tweet|
@@ -91,10 +91,10 @@ def seedDB2( num_users, num_hashtags )
   #
 
   # first lookup our tweet and hashtag ranges for fast bulk insertion!
-  min_tweet = IBM_DB.exec(conn, "SELECT MIN(id) FROM tweets;")[0]["min"].to_i
-  max_tweet = IBM_DB.exec(conn, "SELECT MAX(id) FROM tweets;")[0]["max"].to_i
-  min_hash = IBM_DB.exec(conn, "SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
-  max_hash = IBM_DB.exec(conn, "SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
+  min_tweet = getSimpleValue(conn, "SELECT MIN(id) FROM tweets;")
+  max_tweet = getSimpleValue(conn, "SELECT MAX(id) FROM tweets;")
+  min_hash = getSimpleValue(conn, "SELECT MIN(id) FROM hashtags;")
+  max_hash = getSimpleValue(conn, "SELECT MAX(id) FROM hashtags;")
 
   puts "- associating tweets with hashtags. Hold on..."
 
@@ -118,4 +118,7 @@ def seedDB2( num_users, num_hashtags )
 
 end
 
-seedDB2( 10, 10 )
+def getSimpleValue(conn, sql_statement)
+	r = IBM_DB.exec(conn, sql_statement)
+	IBM_DB.fetch_both(r)[0]
+end
