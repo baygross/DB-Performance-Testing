@@ -14,9 +14,11 @@ class MongoTest
   #returns the specified number of random hashtag ids from DB
   #or all hashtag ids if num_hashtags == nil
   def getHashtags( num_hashtags = nil )
-
+    
     #oh boy, grab every single hashtag
-    hashtags = @db['users'].find.collect{ |u| u['tweets'].collect{|t| t['hashtags']}.flatten }.flatten
+    debug "selecting for hashtags"
+    hashtags = @db['users'].find({}, {:fields => {'tweets.hashtags' => 1, '_id' => 0} })
+    hashtags = hashtags.to_a.collect{ |u| u['tweets'].collect{|t| t['hashtags']} }.flatten(2)
     if num_hashtags
       hashtags = hashtags.uniq.sample( num_hashtags )
     end
@@ -27,34 +29,39 @@ class MongoTest
   
   #returns the specified number of random user ids from DB
   #or all user ids if num_users == nil
-  #TODO:  switch these requests to only return uid?  can mongo do that?
   def getUsers( num_users = nil )
     
-    #seelct for users from the db
+    debug "selecting for users"
+    #select for users from the db
     if num_users
       #select randomly if limited
       rseed = rand()
-      users = @db['users'].find( 'random' => { '$gte' => rseed } ).limit( num_users )
+      users = @db['users'].find( { 'random' => { '$gte' => rseed } }, { :fields => {} } ).limit( num_users )
       #make sure we hit our limit!
       if !users || users.count < num_users_requested
-        users += @db['users'].find( 'random' => { '$lte' => rseed } ).limit( num_users - users.count )
+        users += @db['users'].find( { 'random' => { '$lte' => rseed } }, { :fields => {} } ).limit( num_users - users.count )
       end
     else
       #or just grab all of the users
-      users = @db['users'].find({})
+      users = @db['users'].find({}, { :fields => {} } )
     end
-    
-    #map user objects to be just their uid
-    #and return
-    users.to_a.map{|u| u['_id']}
-    
+    users = users.to_a.map{|u| u['_id']}
+
+    #return
+    users
   end
 
 
   #user_id writes a tweet
   def tweet ( user_id )
+    
     #get current tweets for user
-    user_tweets = (@db['users'].find("_id" => user_id).to_a[0])['tweets']
+    user = @db['users'].find("_id" => user_id).to_a[0]
+    if !user
+      puts "ERROR finding user: #{user_id}"
+      return false
+    end
+    user_tweets = user['tweets']
 
     #generate new tweet
     body = "This is a new tweet being written to the DB!"
@@ -85,7 +92,7 @@ class MongoTest
     #   { '$group' => { '_id' => "$_id", 'task' => {'$push'  => "$tweets"} } }  # group subdocs back into array in parent doc
     # );
     results = @db['users'].find({'tweets.hashtags' => hashtag})
-    debug "hashtag: \'#" + hashtag.to_s + "\' had " + 0.to_s + " tweets."
+    debug "hashtag: \'#" + hashtag.to_s + "\' had " + results.count.to_s + " tweets."
   end
 
   #lookup all of the tweets for a specific user
@@ -94,7 +101,7 @@ class MongoTest
     user = result.to_a[0]
 
     if !user
-      puts "error finding user: " + user_id.to_s
+      puts "ERROR finding user: " + user_id.to_s
     else
       debug 'user: ' + user_id.to_s + " had " + user['tweets'].count.to_s + " tweets."
       return user['tweets']
