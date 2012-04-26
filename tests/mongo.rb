@@ -10,23 +10,44 @@ class MongoTest
     @db = connection.db( config['db'] )
   end
 
-  #params: num_users and num_hashtags requested
-  #returns object with user_ids and hashtags to be used in the next 3 functions
-  def getTargets (num_users_requested, num_hashtags_requested)
-            
-    rseed = rand()
-    users = @db['users'].find( 'random' => { '$gte' => rseed } ).limit(num_users_requested)
-    if !users || users.count < num_users_requested
-      users = @db['users'].find( 'random' => { '$lte' => rseed } ).limit(num_users_requested)
-    end
-    users = users.to_a.map{|u| u['_id']}
   
+  #returns the specified number of random hashtag ids from DB
+  #or all hashtag ids if num_hashtags == nil
+  def getHashtags( num_hashtags = nil )
+
     #oh boy, grab every single hashtag
     hashtags = @db['users'].find.collect{ |u| u['tweets'].collect{|t| t['hashtags']}.flatten }.flatten
-    hashtags.uniq.sample( num_hashtags_requested )
-
-    # return our final hash
-    {:users => users, :hashtags => hashtags}
+    if num_hashtags
+      hashtags = hashtags.uniq.sample( num_hashtags )
+    end
+    
+    #return our hashtags
+    hashtags
+  end
+  
+  #returns the specified number of random user ids from DB
+  #or all user ids if num_users == nil
+  #TODO:  switch these requests to only return uid?  can mongo do that?
+  def getUsers( num_users = nil )
+    
+    #seelct for users from the db
+    if num_users
+      #select randomly if limited
+      rseed = rand()
+      users = @db['users'].find( 'random' => { '$gte' => rseed } ).limit( num_users )
+      #make sure we hit our limit!
+      if !users || users.count < num_users_requested
+        users += @db['users'].find( 'random' => { '$lte' => rseed } ).limit( num_users - users.count )
+      end
+    else
+      #or just grab all of the users
+      users = @db['users'].find({})
+    end
+    
+    #map user objects to be just their uid
+    #and return
+    users.to_a.map{|u| u['_id']}
+    
   end
 
 

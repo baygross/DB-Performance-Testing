@@ -52,11 +52,16 @@ def testSaddle( dbslug )
   
   #get targets from the client connection
   puts "- aquiring target tuples from DB..."
+  targets = {}
+  
+  #how many tweets & hashtags do we need?
   @num_users = @return_tweets_for_a_user + @user_posts_a_new_tweet
   @num_hashtags = @return_tweets_for_a_hashtag
   
-  targets = @client.getTargets( @num_users, @num_hashtags ) 
-  #=> targets = { :users =[],  :hashtags => [] }
+  #get all user ids/keys for now
+  targets[:users] = @client.getUsers( ) 
+  #but get just as many hashtags as we need
+  targets[:hashtags] =  @client.getHashtags( @num_hashtags ) 
   
   #initialize thread pool
   puts "- initializing thread pool of size #{@pool_size}..."
@@ -81,21 +86,21 @@ def testSaddle( dbslug )
       
       #lookup user tweets    
       when :user_lookup     
-        u = targets[:users].pop
+        u = targets[:users].sample
         tpool.schedule do
           @client.lookup_user( u )
         end       
 
       #lookup tweets by hashtag
       when :hash_lookup
-        h = targets[:hashtags].pop
+        h = targets[:hashtags].sample
         tpool.schedule do
           @client.lookup_hashtag( h )
         end
         
       #post a new tweet 
       when :new_tweet
-        u = targets[:users].pop
+        u = targets[:users].sample
         tpool.schedule do
           @client.tweet( u )
         end

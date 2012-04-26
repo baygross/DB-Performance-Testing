@@ -9,27 +9,49 @@ class PGTest
     #todo: this is probably wrong
     config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
     conn = IBM_DB.connect(config['host'], config['db'], config['password'])
-  end
-
-  #params: num_users and num_hashtags requested
-  #returns object with user_ids and hashtags to be used in the next 3 functions
-  def getTargets (num_users_requested, num_hashtags_requested)
-
+    
     #Get bounds, assume no delete    
     @min_user = IBM_DB.exec(conn, "SELECT MIN(id) FROM users;")
     @max_user = IBM_DB.exec(conn, "SELECT MAX(id) FROM users;")
     @min_hash = IBM_DB.exec(conn, "SELECT MIN(id) FROM hashtags;")
     @max_hash = IBM_DB.exec(conn, "SELECT MAX(id) FROM hashtags;")
-    
-    #randomly select some users
-    users = (@min_user..@max_user).to_a.sample(num_users_requested)
-
-    #randomly select some hashtags
-    hashtags = (@min_hash..@max_hash).to_a.sample(num_users_requested)
-
-    #return our targets
-    {:users => users, :hashtags => hashtags}
   end
+
+  
+  #returns the specified number of random hashtag ids from DB
+  #or all hashtag ids if num_hashtags == nil
+  def getHashtags( num_hashtags = nil )
+    
+    #get all hashtags
+    hashtags = (@min_hash..@max_hash).to_a
+    
+    #limit if necessary
+    if num_hashtags
+      hashtags = hashtags.sample( num_hashtags )
+    end
+    
+    #return
+    hashtags
+    
+  end
+  
+  #returns the specified number of random user ids from DB
+  #or all user ids if num_users == nil
+  def getUsers( num_users = nil )
+
+    #get all users
+    users = (@min_user..@max_user).to_a
+    
+    #limit if necessary
+    if num_users
+      users = users.sample( num_users )
+    end
+    
+    #return
+    users
+    
+  end
+  
 
   #writes a tweet for the given user
   def tweet (user_id)

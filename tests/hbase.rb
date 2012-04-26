@@ -7,6 +7,7 @@ class HBaseTest
   
   #connect to the DB and set instance variables
   def initialize(  )
+    
     config = YAML.load_file( @@path + '../config/db.yml' )['HBase']
     address = 'http://' + config['host'] + ':' + config['port'].to_s
     @db = Stargate::Client.new( address )
@@ -15,25 +16,45 @@ class HBaseTest
     #TODO: do we REALLY have to scan the whole table!?
     scanner = @db.open_scanner( 'users', { :columns => ['info:'] }  )
     users = @db.get_rows( scanner )   
-    
     @min_users = users.first.name.to_i
     @max_users = users.last.name.to_i
+    
   end
-
-
-  #params: num_users and num_hashtags requested  
-  #returns object with user_ids and hashtags to be used in the next 3 functions
-  def getTargets( num_users_requested, num_hashtags_requested )
-
-    #select users randomly using their ids
-    users = (@min_users..@max_users).to_a.sample(num_users_requested)
+  
+  #returns the specified number of random hashtag ids from DB
+  #or all hashtag ids if num_hashtags == nil
+  def getHashtags( num_hashtags = nil )
     
     #select hashtags randomly with table scan
     scanner = @db.open_scanner( 'hashtags', { :columns => ['meta:'] }  )
-    hts = @db.get_rows( scanner )
-    hts = hts.sample(num_hashtags_requested).map(&:name)
+    hashtags = @db.get_rows( scanner )
     
-    return {:users => users, :hashtags => hts}
+    #limit as necessary
+    if num_hashtags
+      hashtags = hashtags.sample( num_hashtags)
+    end
+    
+    #map to just the hashtag name
+    #and return
+    hashtags.map(&:name)
+
+  end
+  
+  #returns the specified number of random user ids from DB
+  #or all user ids if num_users == nil
+  def getUsers( num_users = nil )
+    
+    #get all users
+    users = (@min_user..@max_user).to_a
+    
+    #limit if necessary
+    if num_users
+      users = users.sample( num_users )
+    end
+    
+    #return
+    users
+    
   end
   
   

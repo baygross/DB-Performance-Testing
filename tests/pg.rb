@@ -15,28 +15,50 @@ class PGTest
             :password => config['password'],
             :dbname => config['dbname']
            })
+           
+     #Get bounds, assume no delete    
+     @min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
+     @max_hash = @db.exec("SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
+     @min_user = @db.exec("SELECT MIN(id) FROM users;")[0]["min"].to_i
+     @max_user = @db.exec("SELECT MAX(id) FROM users;")[0]["max"].to_i
+     
   end
 
-  #params: num_users and num_hashtags requested
-  #returns object with user_ids and hashtags to be used in the next 3 functions
-  def getTargets (num_users_requested, num_hashtags_requested)
-
-    #Get bounds, assume no delete    
-    @min_user = @db.exec("SELECT MIN(id) FROM users;")[0]["min"].to_i
-    @max_user = @db.exec("SELECT MAX(id) FROM users;")[0]["max"].to_i
-    @min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
-    @max_hash = @db.exec("SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
+  #returns the specified number of random hashtag ids from DB
+  #or all hashtag ids if num_hashtags == nil
+  def getHashtags( num_hashtags = nil )
     
-    #randomly select some users
-    users = (@min_user..@max_user).to_a.sample(num_users_requested)
-
-    #randomly select some hashtags
-    hashtags = (@min_hash..@max_hash).to_a.sample(num_users_requested)
-
-    #return our targets
-    {:users => users, :hashtags => hashtags}
+    #get all hashtags
+    hashtags = (@min_hash..@max_hash).to_a
+    
+    #limit if necessary
+    if num_hashtags
+      hashtags = hashtags.sample( num_hashtags )
+    end
+    
+    #return
+    hashtags
+    
   end
-
+  
+  #returns the specified number of random user ids from DB
+  #or all user ids if num_users == nil
+  def getUsers( num_users = nil )
+    
+    #get all users
+    users = (@min_user..@max_user).to_a
+    
+    #limit if necessary
+    if num_users
+      users = users.sample( num_users )
+    end
+    
+    #return
+    users
+    
+  end
+  
+  
   #writes a tweet for the given user
   def tweet ( user_id )
     
