@@ -25,8 +25,8 @@ def main
   @@path = Pathname(__FILE__).dirname.realpath
   
   #testSaddle( :pg )
-  testSaddle( :mongo )
-  #testSaddle( :hbase )
+  #testSaddle( :mongo )
+  testSaddle( :hbase )
   #testSaddle( :db2 )
   
 end

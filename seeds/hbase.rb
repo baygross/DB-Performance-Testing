@@ -37,8 +37,8 @@ def seedHBase( num_users, num_hashtags )
   debug "generating #{num_users} users & their tweets with hashtags"
   num_users.times do |user_i|
 
-    #log every 500
-    debug "creating user: #{user_i}" if ( user_i%500 == 0 && user_i != 0) 
+    #log every 100
+    debug "creating user: #{user_i}" if ( user_i%100 == 0 && user_i != 0) 
 
     #get a new user from the generate API
     user = @Generate.twitter_user({ :with_hashtags => true })
