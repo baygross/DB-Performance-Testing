@@ -12,8 +12,8 @@ def seedHBase( num_users, num_hashtags )
   # Connect to HBase DB
   #
   config = YAML.load_file( @@path + '../config/db.yml' )['HBase']
-  address = 'http://' + config['host'] + ':' + config['port'].to_s
-  @db = Stargate::Client.new( address, {:timeout => 15000} )
+  @address = 'http://' + config['host'] + ':' + config['port'].to_s
+  @db = Stargate::Client.new( @address, {:timeout => 15000} )
 
 
   #
@@ -35,44 +35,14 @@ def seedHBase( num_users, num_hashtags )
   # Generate Users and Tweets 
   #
   debug "generating #{num_users} users & their tweets"
-  @hashtag_cols = {}
-  #=> {   :hashtag =>  [ array of cols],  :hashtag => [ array of cols ] }
+  
   num_users.times do |user_i|
-
-    #pause a second every 500 users
-    sleep(2) if ( user_i%500 == 0&& user_i != 0 )
-      
-    #flush hashtags and print log every 2000 users
-    if ( user_i%2000 == 0 && user_i != 0 ) 
-      debug "#{user_i} users created thus far."
-      sleep(6)
-      debug "- now flushing all hashtag rows."
-
-      # loop over all hashtags and add meta col
-      # then insert row into DB
-      i = 0
-      @hashtag_cols.each do |hash, cols|
-        i = i+1
-        #pause every 500 hashtags
-        sleep(1) if (i%500 == 0)
-          
-        cols << {:name => 'meta:flag',  :value => 1}
-        begin
-        	@db.create_row('hashtags', hash, Time.now.to_i, cols)
-        rescue
-        	@db = Stargate::Client.new( address, {:timeout => 15000} )
-        	@db.create_row('hashtags', hash, Time.now.to_i, cols)
-        end
-
-      end
-      debug("- done flushing hashtag block")
-      sleep(5)
-      debug("- done sleeping, starting next batch")
-      @hashtags_cols = {}
-    end
+    
+    #pause for breath every 500 users
+    pause(2) if user_i%500 == 0 && user_i != 0
 
     #get a new user from the generate API
-    user = @Generate.twitter_user({ :with_hashtags => true })
+    user = @Generate.twitter_user()
 
     #add that user's attributes to columns
     user_cols = [ {:name => 'info:fname', :value => user[:fname]},
@@ -84,13 +54,7 @@ def seedHBase( num_users, num_hashtags )
     user[:tweets].each_with_index do |tweet, tweet_i|
       
       #store each tweet for bulk insert
-      user_cols << {:name => 'tweets:'+tweet_i.to_s, :value => tweet[:body]}
-      
-      #remember associated hashtags for bulk insert later
-      tweet[:hashtags].each do |ht|
-        @hashtag_cols[ht] ||= []
-        @hashtag_cols[ht] << {:name => 'tweets:'+user_i.to_s+'_' + tweet_i.to_s, :value => tweet[:body]}
-      end
+      user_cols << {:name => 'tweets:'+tweet_i.to_s, :value => tweet}
       
     end
     
@@ -98,11 +62,53 @@ def seedHBase( num_users, num_hashtags )
     begin
     	@db.create_row('users', user_i.to_s, Time.now.to_i, user_cols)
     rescue
-    	@db = Stargate::Client.new( address, {:timeout => 15000} )
+    	@db = Stargate::Client.new( @address, {:timeout => 15000} )
     	@db.create_row('users', user_i.to_s, Time.now.to_i, user_cols)
     end
     
   end
-        
+  debug "all #{num_users} users created"
+  
+  
+  # 
+  # Generate Hashtags
+  #
+  
+  # note: because HBase sucks and seeded unbearably slow
+  #       these do NOT correspond to tweets in the user table
+  #       but this won't matter in our test suite
+  debug "now generating #{ num_hashtags } hashtags"
+  
+  #on average each hashtag should have 1k tweets
+  #so randomly add tweets to hashtags in batches of 100
+  #TODO: these numbers are based off of static seed data, should abstract out
+  
+  (num_hashtags * 10).times do |i|
+    
+    #pause for breath every 500 inserts
+    pause(2) if i%500 == 0 && i != 0
+    
+    hash = @Generate.twitter_hashtag
+    ht_cols = Array.new(100, {:name => 'tweets_' + rand(num_users).to_s + rand(100).to_s, :value => @Generate.randTweet})
+    ht_cols << {:name => 'meta:flag',  :value => 1}
+    
+    begin
+    	@db.create_row('hashtags', hash, Time.now.to_i, ht_cols)
+    rescue
+    	@db = Stargate::Client.new( @address, {:timeout => 15000} )
+    	@db.create_row('hashtags', hash, Time.now.to_i, ht_cols)
+    end
+    
+    
+  end
+  
   debug "done!"
+end
+
+#
+# Pause function!
+#
+def pause( t )
+  debug "pausing for #{t} seconds"
+  sleep( t)
 end
