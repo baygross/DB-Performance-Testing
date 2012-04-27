@@ -81,13 +81,15 @@ class DB2test
   def lookup_hashtag (hashtag)
     # TODO: If bad performance, we might do a seondary query instead of a join
     resp = IBM_DB.exec(@conn, 'SELECT * from tweets t INNER JOIN  hashtags_tweets ht ON ht.tweet_id = t.id INNER JOIN users u ON t.user_id = u.id WHERE hashtag_id = #{hashtag}')
-    debug 'hashtag: ' + hashtag.to_s + " had " + resp.count.to_s + " tweets"
+    #TODO: Verify manually, cannot count results in DB2
+    #debug 'hashtag: ' + hashtag.to_s + " had " + resp.count.to_s + " tweets"
   end
 
   #returns all tweets from a specific user
   def lookup_user (user_id)
     tweets = IBM_DB.exec(@conn, 'SELECT * from tweets t WHERE user_id = #{user_id}')
-    debug 'user: ' + user_id.to_s + " had " + resp.count.to_s + " tweets"
+    #TODO: Verify manually, cannot count results in DB2
+    #debug 'user: ' + user_id.to_s + " had " + resp.count.to_s + " tweets"
   end
 end
 
