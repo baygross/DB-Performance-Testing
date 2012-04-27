@@ -83,6 +83,7 @@ class DB2test
     resp = IBM_DB.exec(@conn, 'SELECT * from tweets t INNER JOIN  hashtags_tweets ht ON ht.tweet_id = t.id INNER JOIN users u ON t.user_id = u.id WHERE hashtag_id = #{hashtag}')
     #TODO: Verify manually, cannot count results in DB2
     #debug 'hashtag: ' + hashtag.to_s + " had " + resp.count.to_s + " tweets"
+    debug "fetched tweets for hashtag: " + hashtag.to_s
   end
 
   #returns all tweets from a specific user
@@ -90,6 +91,7 @@ class DB2test
     tweets = IBM_DB.exec(@conn, 'SELECT * from tweets t WHERE user_id = #{user_id}')
     #TODO: Verify manually, cannot count results in DB2
     #debug 'user: ' + user_id.to_s + " had " + resp.count.to_s + " tweets"
+    debug "fetched tweets for user: " + user_id.to_s
   end
 end
 
