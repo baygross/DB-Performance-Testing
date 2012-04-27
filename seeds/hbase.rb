@@ -39,15 +39,15 @@ def seedHBase( num_users, num_hashtags )
   num_users.times do |user_i|
 
     #flush hashtags and print log every 500 users
-    if ( user_i%500 == 0 && user_i != 0) 
-      debug "creating user: #{user_i}" 
-      debug "- flushing all hashtag rows"
+    if ( user_i%1000 == 0 && user_i != 0) 
+      debug "#{user_i} users created thus far." 
+      debug "- now flushing all hashtag rows."
 
       # loop over all hashtags and add meta col
       # then insert row into DB
       @hashtag_cols.each do |hash, cols|
         
-        hashtag_cols[hash] = hashtag_cols[hash] << {:name => 'meta:flag',  :value => 1}
+        @hashtag_cols[hash] = @hashtag_cols[hash] << {:name => 'meta:flag',  :value => 1}
         begin
         	@db.create_row('hashtags', hash, Time.now.to_i, cols)
         rescue
@@ -56,6 +56,7 @@ def seedHBase( num_users, num_hashtags )
         end
 
       end
+      debug("- done flushing hashtag block")
       @hashtags_cols = {}
     end
 
