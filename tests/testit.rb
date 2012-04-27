@@ -65,7 +65,12 @@ def testSaddle( dbslug )
   
   #initialize thread pool
   puts "- initializing thread pool of size #{@pool_size}..."
-  tpool = Pool.new(@pool_size)
+  # establish new DB connection for each thread (except mongo which shares a pool)
+  if dbslug == :mongo
+    tpool = Pool.new(@pool_size, lambda {  } )
+  else
+    tpool = Pool.new(@pool_size, lambda { @client.initialize } )
+  end
 
   #generate a jobs list and randomly sort it
   jobs = []

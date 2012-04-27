@@ -17,10 +17,10 @@ class PGTest
            })
            
      #Get bounds, assume no delete    
-     @min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
-     @max_hash = @db.exec("SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
-     @min_user = @db.exec("SELECT MIN(id) FROM users;")[0]["min"].to_i
-     @max_user = @db.exec("SELECT MAX(id) FROM users;")[0]["max"].to_i
+     @min_hash ||= @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
+     @max_hash ||= @db.exec("SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
+     @min_user ||= @db.exec("SELECT MIN(id) FROM users;")[0]["min"].to_i
+     @max_user ||= @db.exec("SELECT MAX(id) FROM users;")[0]["max"].to_i
      
   end
 

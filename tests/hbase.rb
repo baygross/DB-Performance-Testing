@@ -14,10 +14,12 @@ class HBaseTest
     
     #get range of users
     #TODO: do we REALLY have to scan the whole table!?
-    scanner = @db.open_scanner( 'users', { :columns => ['info:'] }  )
-    users = @db.get_rows( scanner )   
-    @min_users = users.first.name.to_i
-    @max_users = users.last.name.to_i
+    if !@min_users || !@max_users
+      scanner = @db.open_scanner( 'users', { :columns => ['info:'] }  )
+      users = @db.get_rows( scanner )   
+      @min_users = users.first.name.to_i
+      @max_users = users.last.name.to_i
+    end
     
   end
   
