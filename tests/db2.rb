@@ -61,7 +61,7 @@ class PGTest
     #generate a new tweet
     body = "This is a new tweet being written to the DB!"
     
-    IBM_DB.exec(@conn, 'INSERT INTO tweets(tweet, user_id) VALUES( #{body.gsub(/'/,'')}, #{user_id} );')
+    IBM_DB.exec(@conn, "INSERT INTO tweets(tweet, user_id) VALUES( '#{body.gsub(/'/,'')}', #{user_id} );")
     new_id = getSimpleValue(@conn, "SELECT IDENTITY_VAL_LOCAL() FROM users").to_i
       
     #insert 0-2 hashtags per tweet
