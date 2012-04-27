@@ -6,18 +6,17 @@ require 'yaml'
 class PGTest
 
   def initialize
-    #todo: this is probably wrong
-    config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
+  	#config = YAML.load_file( '/home/ubuntu/DB-Performance-Testing/config/db.yml' )['DB2']
     config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
 	  cstring = "DATABASE=#{config['db']};HOSTNAME=#{config['hostname']};"
 	  cstring += "PORT=#{config['port']};PROTOCOL=#{config['protocol']};UID=#{config['uid']};PWD=#{config['pwd']};"
 	  @conn = IBM_DB.connect(cstring,"","")
     
     #Get bounds, assume no delete    
-    @min_user ||= IBM_DB.exec(@conn, "SELECT MIN(id) FROM users;")
-    @max_user ||= IBM_DB.exec(@conn, "SELECT MAX(id) FROM users;")
-    @min_hash ||= IBM_DB.exec(@conn, "SELECT MIN(id) FROM hashtags;")
-    @max_hash ||= IBM_DB.exec(@conn, "SELECT MAX(id) FROM hashtags;")
+    @min_user ||= getSimpleValue(@conn, "SELECT MIN(id) FROM users;")
+    @max_user ||= getSimpleValue(@conn, "SELECT MAX(id) FROM users;")
+    @min_hash ||= getSimpleValue(@conn, "SELECT MIN(id) FROM hashtags;")
+    @max_hash ||= getSimpleValue(@conn, "SELECT MAX(id) FROM hashtags;")
   end
 
   
