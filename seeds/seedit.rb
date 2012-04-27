@@ -11,7 +11,7 @@ def main
   
 #------- Config Variables ----------------------------------------------------
 
-  num_users = 100000 #=> #100k
+  num_users = 98000 #=> #100k
   num_hashtags = 10000   #10k
 
   power_user = [100, 200]  #range of tweets

@@ -16,19 +16,19 @@ def seedHBase( num_users, num_hashtags )
   @db = Stargate::Client.new( address, {:timeout => 15000} )
 
 
-  #
-  #Get rid of existing tables
-  #
-  tables = @db.list_tables.each do |table|
-    @db.delete_table(table.name)
-  end
-
-  #
-  # Create our tables!
-  #
-  debug "creating our tables"
-  users = @db.create_table('users', 'info', 'tweets')
-  hashtags = @db.create_table('hashtags', 'meta', 'tweets')
+  # #
+  # #Get rid of existing tables
+  # #
+  # tables = @db.list_tables.each do |table|
+  #   @db.delete_table(table.name)
+  # end
+  # 
+  # #
+  # # Create our tables!
+  # #
+  # debug "creating our tables"
+  # users = @db.create_table('users', 'info', 'tweets')
+  # hashtags = @db.create_table('hashtags', 'meta', 'tweets')
 
 
   # 
@@ -38,12 +38,12 @@ def seedHBase( num_users, num_hashtags )
   @hashtag_cols = {}
   num_users.times do |user_i|
 
-    #pause a half second every 50 users
-    sleep (0.5) if ( user_i%50 == 0&& user_i != 0 )
+    #pause a quarter second every 50 users
+    sleep (0.25) if ( user_i%50 == 0&& user_i != 0 )
       
       
-    #flush hashtags and print log every 500 users
-    if ( user_i%1000 == 0 && user_i != 0 ) 
+    #flush hashtags and print log every 2000 users
+    if ( user_i%2000 == 0 && user_i != 0 ) 
       debug "#{user_i} users created thus far."
       debug "- now flushing all hashtag rows."
 
@@ -65,6 +65,8 @@ def seedHBase( num_users, num_hashtags )
 
       end
       debug("- done flushing hashtag block")
+      sleep(5)
+      debug("- done sleeping, starting next batch")
       @hashtags_cols = {}
     end
 
