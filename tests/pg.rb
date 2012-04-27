@@ -2,7 +2,7 @@
 
 require 'pg'
 require 'yaml'
-
+#TODO: Replace exec with async_exec for threading or use thread pool init
 class PGTest
 
   #connect to the DB and set instance variables
