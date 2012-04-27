@@ -59,8 +59,8 @@ class PGTest
     #generate a new tweet
     body = "This is a new tweet being written to the DB!"
     
-    # TODO: Parse the return of this properly
-    new_id = IBM_DB.exec(@conn, 'INSERT INTO tweets(tweet, user_id) VALUES( #{body}, #{user_id} ) RETURNING id;')
+    IBM_DB.exec(@conn, 'INSERT INTO tweets(tweet, user_id) VALUES( #{body.gsub(/'/,'')}, #{user_id} );')
+    new_id = getSimpleValue(conn, "SELECT IDENTITY_VAL_LOCAL() FROM users").to_i
       
     #insert 0-2 hashtags per tweet
     rand(2).times do
@@ -83,4 +83,9 @@ class PGTest
     tweets = IBM_DB.exec(@conn, 'SELECT * from tweets t WHERE user_id = #{user_id}')
     debug 'user: ' + user_id.to_s + " had " + resp.count.to_s + " tweets"
   end
+end
+
+def getSimpleValue(conn, sql_statement)
+	r = IBM_DB.exec(conn, sql_statement)
+	IBM_DB.fetch_both(r)[0]
 end
