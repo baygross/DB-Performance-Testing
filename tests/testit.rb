@@ -26,7 +26,7 @@ def main
   
   #testSaddle( :pg )
   #testSaddle( :mongo )
-  #testSaddle( :hbase )
+  testSaddle( :hbase )
   #testSaddle( :db2 )
   
 end
@@ -69,7 +69,7 @@ def testSaddle( dbslug )
   if dbslug == :mongo
     tpool = Pool.new(@pool_size, lambda {  } )
   else
-    tpool = Pool.new(@pool_size, lambda { @client.initialize } )
+    tpool = Pool.new(@pool_size, lambda { @client.connectDB } )
   end
 
   #generate a jobs list and randomly sort it

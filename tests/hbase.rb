@@ -5,22 +5,27 @@ require 'yaml'
 
 class HBaseTest
   
-  #connect to the DB and set instance variables
+  #connect to the DB and and set instance variables
   def initialize(  )
-    
-    config = YAML.load_file( @@path + '../config/db.yml' )['HBase']
-    address = 'http://' + config['host'] + ':' + config['port'].to_s
-    @db = Stargate::Client.new( address )
+  
+    #connect to the DB
+    self.connectDB()
     
     #get range of users
     #TODO: do we REALLY have to scan the whole table!?
-    if !@min_users || !@max_users
-      scanner = @db.open_scanner( 'users', { :columns => ['info:'] }  )
-      users = @db.get_rows( scanner )   
-      @min_users = users.first.name.to_i
-      @max_users = users.last.name.to_i
-    end
+    scanner = @db.open_scanner( 'users', { :columns => ['info:'] }  )
+    users = @db.get_rows( scanner )   
+    @min_user = users.first.name.to_i
+    @max_user = users.last.name.to_i
+
     
+  end
+  
+  #establish connection to the DB
+  def connectDB( )
+    config = YAML.load_file( @@path + '../config/db.yml' )['HBase']
+    address = 'http://' + config['host'] + ':' + config['port'].to_s
+    @db = Stargate::Client.new( address )
   end
   
   #returns the specified number of random hashtag ids from DB

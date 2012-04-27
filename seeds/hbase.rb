@@ -36,6 +36,7 @@ def seedHBase( num_users, num_hashtags )
   #
   debug "generating #{num_users} users & their tweets"
   @hashtag_cols = {}
+  #=> {   :hashtag =>  [ array of cols],  :hashtag => [ array of cols ] }
   num_users.times do |user_i|
 
     #pause a second every 500 users
@@ -53,9 +54,9 @@ def seedHBase( num_users, num_hashtags )
       @hashtag_cols.each do |hash, cols|
         i = i+1
         #pause every 500 hashtags
-        sleep(3) if (i%500 == 0)
+        sleep(1) if (i%500 == 0)
           
-        @hashtag_cols[hash] = @hashtag_cols[hash] << {:name => 'meta:flag',  :value => 1}
+        cols << {:name => 'meta:flag',  :value => 1}
         begin
         	@db.create_row('hashtags', hash, Time.now.to_i, cols)
         rescue
@@ -88,7 +89,7 @@ def seedHBase( num_users, num_hashtags )
       #remember associated hashtags for bulk insert later
       tweet[:hashtags].each do |ht|
         @hashtag_cols[ht] ||= []
-        @hashtag_cols[ht] << {:name => 'tweets:'+user_i.to_s+'_' + tweet_i.to_s, :value => tweet}
+        @hashtag_cols[ht] << {:name => 'tweets:'+user_i.to_s+'_' + tweet_i.to_s, :value => tweet[:body]}
       end
       
     end

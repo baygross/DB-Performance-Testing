@@ -6,6 +6,20 @@ class PGTest
 
   #connect to the DB and set instance variables
   def initialize
+
+    #connect to DB
+    self.connectDB()
+           
+   #Get bounds, assume no delete    
+   @min_hash = @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
+   @max_hash = @db.exec("SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
+   @min_user = @db.exec("SELECT MIN(id) FROM users;")[0]["min"].to_i
+   @max_user = @db.exec("SELECT MAX(id) FROM users;")[0]["max"].to_i
+     
+  end
+  
+  #establish new connection to the DB
+  def connectDB
     config = YAML.load_file( @@path + '../config/db.yml' )['PG']
     @db = PG.connect({ 
             :host => config['host'],
@@ -14,13 +28,6 @@ class PGTest
             :password => config['password'],
             :dbname => config['dbname']
            })
-           
-     #Get bounds, assume no delete    
-     @min_hash ||= @db.exec("SELECT MIN(id) FROM hashtags;")[0]["min"].to_i
-     @max_hash ||= @db.exec("SELECT MAX(id) FROM hashtags;")[0]["max"].to_i
-     @min_user ||= @db.exec("SELECT MIN(id) FROM users;")[0]["min"].to_i
-     @max_user ||= @db.exec("SELECT MAX(id) FROM users;")[0]["max"].to_i
-     
   end
 
   #returns the specified number of random hashtag ids from DB

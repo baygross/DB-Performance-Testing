@@ -5,6 +5,10 @@ require 'mongo'
 class MongoTest
 
   def initialize( pool_size = 10 )
+    self.connectDB( pool_size )
+  end
+  
+  def connectDB( pool_size )
     config = YAML.load_file( @@path + '../config/db.yml' )['Mongo']
     connection = Mongo::Connection.new( config['host'], config['port'], :pool_size => pool_size )
     @db = connection.db( config['db'] )
