@@ -11,9 +11,9 @@ require_relative 'threadPool.rb'
 #------- Config Variables ----------------------------------------------------
 
 #how many times to test each interaction?
-@return_tweets_for_a_user = 5 #5000 #=> 2000
-@user_posts_a_new_tweet = 5#1000
-@return_tweets_for_a_hashtag = 5#1000
+@return_tweets_for_a_user = 5000 #=> 2000
+@user_posts_a_new_tweet = 1000
+@return_tweets_for_a_hashtag = 1000
 
 #and how big is our thread pool?
 @pool_size = 40
@@ -25,8 +25,8 @@ def main
   @@path = Pathname(__FILE__).dirname.realpath
   
   #testSaddle( :pg )
-  #testSaddle( :mongo )
-  testSaddle( :hbase )
+  testSaddle( :mongo )
+  #testSaddle( :hbase )
   #testSaddle( :db2 )
   
 end
