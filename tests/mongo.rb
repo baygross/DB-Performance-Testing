@@ -83,14 +83,8 @@ class MongoTest
 
 
   #return all tweets that contain hashtag
-  #TODO: Charlie
+  #TODO: filter results specific tweets
   def lookup_hashtag (hashtag)
-    # result = @db['users'].aggregate(
-    #   { '$match' => { "tweets.hashtag" => hashtag } },             # filter parent documents
-    #   { '$unwind' => '$tweets' },                               # unwind the embedded docs for filtering
-    #   { '$match' => { "tweets.hashtag" => hashtag} },             # filter subdocs
-    #   { '$group' => { '_id' => "$_id", 'task' => {'$push'  => "$tweets"} } }  # group subdocs back into array in parent doc
-    # );
     results = @db['users'].find({'tweets.hashtags' => hashtag})
     debug "hashtag: \'#" + hashtag.to_s + "\' had " + results.count.to_s + " tweets."
   end

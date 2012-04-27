@@ -12,9 +12,10 @@ def seedDB2( num_users, num_hashtags )
   # Connect to DB2 database
   #
   debug "connecting to DB"
-  #TODO: this connection syntax is probably bad
-  #config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
-  conn = IBM_DB.connect("DATABASE=test;HOSTNAME=localhost;PORT=50000;PROTOCOL=TCPIP;UID=db2inst1;PWD=hereiam;","","")
+  config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
+  cstring = "DATABASE=#{config['db']};HOSTNAME=#{config['hostname']};"
+  cstring += "PORT=#{config['port']};PROTOCOL=#{config['protocol']};UID=#{config['uid']};PWD=#{cofing['pwd']};"
+  conn = IBM_DB.connect(cstring,"","")
 
 
   #
@@ -33,7 +34,7 @@ def seedDB2( num_users, num_hashtags )
   IBM_DB.exec(conn, 'CREATE TABLE users(id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, first_name VARCHAR(32), last_name VARCHAR(32), bio VARCHAR(140));')
   #create table for tweets that has tweet and id of user
   IBM_DB.exec(conn, 'CREATE TABLE tweets(id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, tweet VARCHAR(140), user_id INTEGER);')
-  IBM_DB.exec(conn, 'CREATE INDEX user_index ON tweets (user_id);') #TODO: play with clustering key on userid?
+  IBM_DB.exec(conn, 'CREATE INDEX user_index ON tweets (user_id);')
   #create a table for hashtags
   IBM_DB.exec(conn, 'CREATE TABLE hashtags(id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, hashtag VARCHAR(140));')
 
