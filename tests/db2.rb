@@ -8,13 +8,16 @@ class PGTest
   def initialize
     #todo: this is probably wrong
     config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
-    @conn = IBM_DB.connect(config['host'], config['db'], config['password'])
+    config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
+	  cstring = "DATABASE=#{config['db']};HOSTNAME=#{config['hostname']};"
+	  cstring += "PORT=#{config['port']};PROTOCOL=#{config['protocol']};UID=#{config['uid']};PWD=#{config['pwd']};"
+	  @conn = IBM_DB.connect(cstring,"","")
     
     #Get bounds, assume no delete    
-    @min_user ||= IBM_DB.exec(conn, "SELECT MIN(id) FROM users;")
-    @max_user ||= IBM_DB.exec(conn, "SELECT MAX(id) FROM users;")
-    @min_hash ||= IBM_DB.exec(conn, "SELECT MIN(id) FROM hashtags;")
-    @max_hash ||= IBM_DB.exec(conn, "SELECT MAX(id) FROM hashtags;")
+    @min_user ||= IBM_DB.exec(@conn, "SELECT MIN(id) FROM users;")
+    @max_user ||= IBM_DB.exec(@conn, "SELECT MAX(id) FROM users;")
+    @min_hash ||= IBM_DB.exec(@conn, "SELECT MIN(id) FROM hashtags;")
+    @max_hash ||= IBM_DB.exec(@conn, "SELECT MAX(id) FROM hashtags;")
   end
 
   
@@ -60,7 +63,7 @@ class PGTest
     body = "This is a new tweet being written to the DB!"
     
     IBM_DB.exec(@conn, 'INSERT INTO tweets(tweet, user_id) VALUES( #{body.gsub(/'/,'')}, #{user_id} );')
-    new_id = getSimpleValue(conn, "SELECT IDENTITY_VAL_LOCAL() FROM users").to_i
+    new_id = getSimpleValue(@conn, "SELECT IDENTITY_VAL_LOCAL() FROM users").to_i
       
     #insert 0-2 hashtags per tweet
     rand(2).times do

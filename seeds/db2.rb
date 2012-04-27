@@ -14,7 +14,7 @@ def seedDB2( num_users, num_hashtags )
   debug "connecting to DB"
   config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
   cstring = "DATABASE=#{config['db']};HOSTNAME=#{config['hostname']};"
-  cstring += "PORT=#{config['port']};PROTOCOL=#{config['protocol']};UID=#{config['uid']};PWD=#{cofing['pwd']};"
+  cstring += "PORT=#{config['port']};PROTOCOL=#{config['protocol']};UID=#{config['uid']};PWD=#{config['pwd']};"
   conn = IBM_DB.connect(cstring,"","")
 
 
