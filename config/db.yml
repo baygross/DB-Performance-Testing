@@ -13,3 +13,11 @@ Mongo:
   host: 23.21.48.157
   port: 27017
   db: app1
+  
+DB2:
+  db: test
+  hostname: localhost
+  port: 50000
+  protocol: TCPIP
+  uid: db2inst1
+  pwd: hereiam
