@@ -6,11 +6,7 @@ require 'yaml'
 class DB2test
 
   def initialize
-  	#config = YAML.load_file( '/home/ubuntu/DB-Performance-Testing/config/db.yml' )['DB2']
-    config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
-	  cstring = "DATABASE=#{config['db']};HOSTNAME=#{config['hostname']};"
-	  cstring += "PORT=#{config['port']};PROTOCOL=#{config['protocol']};UID=#{config['uid']};PWD=#{config['pwd']};"
-	  @conn = IBM_DB.connect(cstring,"","")
+  	self.connectDB
     
     #Get bounds, assume no delete    
     @min_user ||= getSimpleValue(@conn, "SELECT MIN(id) FROM users;")
@@ -18,7 +14,15 @@ class DB2test
     @min_hash ||= getSimpleValue(@conn, "SELECT MIN(id) FROM hashtags;")
     @max_hash ||= getSimpleValue(@conn, "SELECT MAX(id) FROM hashtags;")
   end
-
+  
+  #establish new connection to the DB
+  def connectDB
+  	#config = YAML.load_file( '/home/ubuntu/DB-Performance-Testing/config/db.yml' )['DB2']
+    config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
+	  cstring = "DATABASE=#{config['db']};HOSTNAME=#{config['hostname']};"
+	  cstring += "PORT=#{config['port']};PROTOCOL=#{config['protocol']};UID=#{config['uid']};PWD=#{config['pwd']};"
+	  @conn = IBM_DB.connect(cstring,"","")
+  end
   
   #returns the specified number of random hashtag ids from DB
   #or all hashtag ids if num_hashtags == nil
