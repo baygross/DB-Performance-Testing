@@ -25,8 +25,8 @@ def main
   @@path = Pathname(__FILE__).dirname.realpath
   
   #testSaddle( :pg )
-  #testSaddle( :mongo )
-  testSaddle( :hbase )
+  testSaddle( :mongo )
+  #testSaddle( :hbase )
   #testSaddle( :db2 )
   
 end
@@ -62,7 +62,6 @@ def testSaddle( dbslug )
   targets[:users] = @client.getUsers( ) 
   #but get just as many hashtags as we need
   targets[:hashtags] =  @client.getHashtags( @num_hashtags ) 
-  p targets
   
   #initialize thread pool
   puts "- initializing thread pool of size #{@pool_size}..."

@@ -25,15 +25,16 @@ def main
   
   #initiate our generator object
   generate_ops = {
-    :power_user => @power_user,
-    :new_user => @new_user,
-    :power_user_ratio => @power_user_ratio
+    :power_user => power_user,
+    :new_user => new_user,
+    :power_user_ratio => power_user_ratio,
+    :num_hashtags => num_hashtags
   }
   @Generate = Generator.new( generate_ops )
   
   # and finally seed each DB in turn
-  seedPG( num_users, num_hashtags )
-  #seedMongo( num_users, num_hashtags )
+  #seedPG( num_users, num_hashtags )
+  seedMongo( num_users, num_hashtags )
   #seedHBase( num_users, num_hashtags )
   #seedDB2( num_users, num_hashtags )
   

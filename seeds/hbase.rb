@@ -34,11 +34,30 @@ def seedHBase( num_users, num_hashtags )
   # 
   # Generate Users and Tweets 
   #
-  debug "generating #{num_users} users & their tweets with hashtags"
+  debug "generating #{num_users} users & their tweets"
+  @hashtag_cols = {}
   num_users.times do |user_i|
 
-    #log every 100
-    debug "creating user: #{user_i}" if ( user_i%100 == 0 && user_i != 0) 
+    #flush hashtags and print log every 500 users
+    if ( user_i%500 == 0 && user_i != 0) 
+      debug "creating user: #{user_i}" 
+      debug "- flushing all hashtag rows"
+
+      # loop over all hashtags and add meta col
+      # then insert row into DB
+      @hashtag_cols.each do |hash, cols|
+        
+        hashtag_cols[hash] = hashtag_cols[hash] << {:name => 'meta:flag',  :value => 1}
+        begin
+        	@db.create_row('hashtags', hash, Time.now.to_i, cols)
+        rescue
+        	@db = Stargate::Client.new( address, {:timeout => 15000} )
+        	@db.create_row('hashtags', hash, Time.now.to_i, cols)
+        end
+
+      end
+      @hashtags_cols = {}
+    end
 
     #get a new user from the generate API
     user = @Generate.twitter_user({ :with_hashtags => true })
@@ -55,22 +74,15 @@ def seedHBase( num_users, num_hashtags )
       #store each tweet for bulk insert
       user_cols << {:name => 'tweets:'+tweet_i.to_s, :value => tweet[:body]}
       
-      #save each tweet to any associated hashtag tables now
+      #remember associated hashtags for bulk insert later
       tweet[:hashtags].each do |ht|
-        cols = [ {:name => 'meta:flag',  :value => 1}, 
-                 {:name => 'tweets:'+user_i.to_s+'_' + tweet_i.to_s, :value => tweet}
-               ]
-        begin
-        	@db.create_row('hashtags', ht, Time.now.to_i, cols)
-        rescue
-		    	@db = Stargate::Client.new( address, {:timeout => 15000} )
-		    	@db.create_row('hashtags', ht, Time.now.to_i, cols)
-        end
+        @hashtag_cols[ht] ||= []
+        @hashtag_cols[ht] << {:name => 'tweets:'+user_i.to_s+'_' + tweet_i.to_s, :value => tweet}
       end
       
     end
     
-    #bulk insert user hash into user row
+    #insert user hash into user row
     begin
     	@db.create_row('users', user_i.to_s, Time.now.to_i, user_cols)
     rescue
@@ -79,5 +91,6 @@ def seedHBase( num_users, num_hashtags )
     end
     
   end
+        
   debug "done!"
 end

@@ -44,7 +44,7 @@ def seedMongo(num_users, num_hashtags)
   
     # batch insert every 500 users
     if (i+1)%500==0
-      debug "inserting block of 500 users docs"
+      debug "#{i} user docs have been created"
       users.insert( user_block )
       user_block = []
     end
