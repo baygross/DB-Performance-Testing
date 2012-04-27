@@ -39,8 +39,8 @@ def seedHBase( num_users, num_hashtags )
   num_users.times do |user_i|
 
     #pause a half second every 50 users
-    if ( user_i%50 == 0&& user_i != 0 )
-      sleep (0.5)
+    sleep (0.5) if ( user_i%50 == 0&& user_i != 0 )
+      
       
     #flush hashtags and print log every 500 users
     if ( user_i%1000 == 0 && user_i != 0 ) 
@@ -53,8 +53,7 @@ def seedHBase( num_users, num_hashtags )
       @hashtag_cols.each do |hash, cols|
         i = i+1
         #pause a half second every 500 hashtags
-        if (i%500 == 0)
-          sleep(0.5)
+        sleep(0.5) if (i%500 == 0)
           
         @hashtag_cols[hash] = @hashtag_cols[hash] << {:name => 'meta:flag',  :value => 1}
         begin
