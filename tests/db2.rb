@@ -3,14 +3,10 @@
 require 'ibm_db'
 require 'yaml'
 
-class PGTest
+class DB2test
 
   def initialize
-  	#config = YAML.load_file( '/home/ubuntu/DB-Performance-Testing/config/db.yml' )['DB2']
-    config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
-	  cstring = "DATABASE=#{config['db']};HOSTNAME=#{config['hostname']};"
-	  cstring += "PORT=#{config['port']};PROTOCOL=#{config['protocol']};UID=#{config['uid']};PWD=#{config['pwd']};"
-	  @conn = IBM_DB.connect(cstring,"","")
+  	self.connectDB
     
     #Get bounds, assume no delete    
     @min_user ||= getSimpleValue(@conn, "SELECT MIN(id) FROM users;")
@@ -18,7 +14,15 @@ class PGTest
     @min_hash ||= getSimpleValue(@conn, "SELECT MIN(id) FROM hashtags;")
     @max_hash ||= getSimpleValue(@conn, "SELECT MAX(id) FROM hashtags;")
   end
-
+  
+  #establish new connection to the DB
+  def connectDB
+  	#config = YAML.load_file( '/home/ubuntu/DB-Performance-Testing/config/db.yml' )['DB2']
+    config = YAML.load_file( @@path + '../config/db.yml' )['DB2']
+	  cstring = "DATABASE=#{config['db']};HOSTNAME=#{config['hostname']};"
+	  cstring += "PORT=#{config['port']};PROTOCOL=#{config['protocol']};UID=#{config['uid']};PWD=#{config['pwd']};"
+	  @conn = IBM_DB.connect(cstring,"","")
+  end
   
   #returns the specified number of random hashtag ids from DB
   #or all hashtag ids if num_hashtags == nil
@@ -61,7 +65,7 @@ class PGTest
     #generate a new tweet
     body = "This is a new tweet being written to the DB!"
     
-    IBM_DB.exec(@conn, 'INSERT INTO tweets(tweet, user_id) VALUES( #{body.gsub(/'/,'')}, #{user_id} );')
+    IBM_DB.exec(@conn, "INSERT INTO tweets(tweet, user_id) VALUES( '#{body.gsub(/'/,'')}', #{user_id} );")
     new_id = getSimpleValue(@conn, "SELECT IDENTITY_VAL_LOCAL() FROM users").to_i
       
     #insert 0-2 hashtags per tweet
@@ -77,13 +81,17 @@ class PGTest
   def lookup_hashtag (hashtag)
     # TODO: If bad performance, we might do a seondary query instead of a join
     resp = IBM_DB.exec(@conn, 'SELECT * from tweets t INNER JOIN  hashtags_tweets ht ON ht.tweet_id = t.id INNER JOIN users u ON t.user_id = u.id WHERE hashtag_id = #{hashtag}')
-    debug 'hashtag: ' + hashtag.to_s + " had " + resp.count.to_s + " tweets"
+    #TODO: Verify manually, cannot count results in DB2
+    #debug 'hashtag: ' + hashtag.to_s + " had " + resp.count.to_s + " tweets"
+    debug "fetched tweets for hashtag: " + hashtag.to_s
   end
 
   #returns all tweets from a specific user
   def lookup_user (user_id)
     tweets = IBM_DB.exec(@conn, 'SELECT * from tweets t WHERE user_id = #{user_id}')
-    debug 'user: ' + user_id.to_s + " had " + resp.count.to_s + " tweets"
+    #TODO: Verify manually, cannot count results in DB2
+    #debug 'user: ' + user_id.to_s + " had " + resp.count.to_s + " tweets"
+    debug "fetched tweets for user: " + user_id.to_s
   end
 end
 
