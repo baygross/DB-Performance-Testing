@@ -8,16 +8,22 @@ class HBaseTest
   #connect to the DB and and set instance variables
   def initialize(  )
   
+    debug "Establishing initial connection to the DB."
     #connect to the DB
     self.connectDB()
     
+    debug "Scanning tables to set instance counts!"  
     #get range of users
     #TODO: do we REALLY have to scan the whole table!?
-    scanner = @db.open_scanner( 'users', { :columns => ['info:'] }  )
-    users = @db.get_rows( scanner )   
-    @min_user = users.first.name.to_i
-    @max_user = users.last.name.to_i
-
+    # scanner = @db.open_scanner( 'users', { :columns => ['info:'] }  )
+    # users = @db.get_rows( scanner )   
+    # @min_user = users.first.name.to_i
+    # @max_user = users.last.name.to_i
+    # @min_user = users.first.name.to_i
+    # @max_user = users.last.name.to_i
+    @min_user = 1
+    @max_user = 100000
+    debug "done setting instance counts!"
     
   end
   
