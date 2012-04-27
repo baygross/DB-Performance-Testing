@@ -16,6 +16,15 @@ class Generator
     #ratio of users that are 'power users'
     @power_user_ratio = ops[:power_user_ratio] || 0.5
     
+    #number of hashtags to generate initially and later and pull from
+    @num_hashtags = ops[:num_hashtags] || 10000
+    
+    #generate hashtags ahead of time
+    @hashtags = []
+    @num_hashtags.times do 
+      @hashtags << generateHashtag
+    end
+    
   end
 
   #-----Methods------------------------------------------
@@ -59,26 +68,12 @@ class Generator
     user
   end
 
-
-  #generates a random hashtag for app1
-  #hashtags can (randomly) be 1,2 or 3 words long
+  #returns a random hashtag from original
+  #pool
   def twitter_hashtag
-    
-    begin
-      text = Random.paragraphs(1)
-      text = text.split  
-    
-      #hashtags are 1-3 words stuck together
-      ret = ''
-      ( rand(3) + 1 ).times do 
-        ret += text.sample.capitalize
-      end
-       
-      ret = ret.gsub(/[\'\"\.\?\!\,\-\_ ]*/, '')
-    end while ret.length < 4
-    
-    return ret
+    @hashtags.sample
   end
+
 
   # generates a random tweet
   # and ensures there is no \n at end
@@ -93,6 +88,29 @@ class Generator
     else
       ret = ret.slice(0, 140)
     end
+    
+  end
+  
+  protected
+  
+  #generates a random hashtag for app1
+  #hashtags can (randomly) be 1,2 or 3 words long
+  def generateHashtag
+    
+    begin
+      text = Random.paragraphs(1)
+      text = text.split  
+
+      #hashtags are 1-3 words stuck together
+      ret = ''
+      ( rand(3) + 1 ).times do 
+        ret += text.sample.capitalize
+      end
+
+      ret = ret.gsub(/[\'\"\.\?\!\,\-\_ ]*/, '')
+    end while ret.length < 4
+
+    return ret
     
   end
 
