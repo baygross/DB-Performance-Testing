@@ -113,9 +113,11 @@ def seedPG( num_users, num_hashtags )
   
   #format data for SQL insertion
   assocs.map!{|set| sprintf("(%s,%s)",set[0],set[1])}
-  q = 'INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ' + assocs.join(",")
+  assocs.each_slice(500) do |tags|
+	  q = 'INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ' + tags.join(",")
+	  #and then save them all en masse
+	  @db.exec( q ) if tags.length > 0
+  end
   
-  #and then save them all en masse
-  @db.exec( q ) if assocs.length > 0
   debug "done!"
 end
