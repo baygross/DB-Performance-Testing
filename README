@@ -1,14 +1,15 @@
-### Data Outline ###
-App 1 :  Twitter
+Comparative Database Querying 
+for High-Volume Low-Contention Web Applications
 
-hashtags: 10k
-users 100k
+Yale University - CS 438
+Professor Daniel Abadi
 
-for each_user
-	decide high_user or low_user
-	assign 10-20 vs 100-200 posts respectively
-	each post gets 0-2 hashtags
-end
+Bay Gross 			bay.gross@yale.edu
+Charlie Croom 	charlie.croom@yale.edu
+Mike Levine			michael.levine@yale.edu
 
+Abstract
+This paper investigates the relative performance of four representative database systems under the simulated workload of a modern class of web applications.  Specifically, we modeled our test suite on the expected high-volume low-contention workload behind many popular “read heavy” web applications such as Twitter, or Tumblr. The database systems tested were IBM’s DB2, PostgreSQL, HBase, and MongoDB, and each of these DBMS was installed “out of the box.”
 
-App 2 : Forum
+--
+All code (for building the schema, generating and seeding the initial data, and executing the final test suite) is maintained and hosted online at GitHub. It can be accessed at the following URL. https://github.com/baygross/DB-Performance-Testing
