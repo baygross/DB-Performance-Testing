@@ -17,6 +17,8 @@ require_relative 'threadPool.rb'
 
 #and how big is our thread pool?
 @pool_size = 40
+@pool_size = ARGV[0].to_i if (ARGV.length > 0)
+puts "Using pool size of:" + @pool_size.to_s
 
 #------------------------------------------------------------------------------
 def main
@@ -48,6 +50,7 @@ def testSaddle( dbslug )
     @client = HBaseTest.new();
   when :db2
     @client = DB2test.new();
+    @client_class = DB2test
   end
   
   #get targets from the client connection
@@ -69,7 +72,7 @@ def testSaddle( dbslug )
   if dbslug == :mongo
     tpool = Pool.new(@pool_size, lambda {  } )
   else
-    tpool = Pool.new(@pool_size, lambda { @client.connectDB } )
+    tpool = Pool.new(@pool_size, @client_class )
   end
 
   #generate a jobs list and randomly sort it
@@ -92,21 +95,21 @@ def testSaddle( dbslug )
       #lookup user tweets    
       when :user_lookup     
         u = targets[:users].sample
-        tpool.schedule do
+        tpool.schedule(:lookup_user,u) do
           @client.lookup_user( u )
         end       
 
       #lookup tweets by hashtag
       when :hash_lookup
         h = targets[:hashtags].sample
-        tpool.schedule do
+        tpool.schedule(:hash_lookup,h) do
           @client.lookup_hashtag( h )
         end
         
       #post a new tweet 
       when :new_tweet
         u = targets[:users].sample
-        tpool.schedule do
+        tpool.schedule(:new_tweet,u) do
           @client.tweet( u )
         end
       end
