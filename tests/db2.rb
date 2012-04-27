@@ -3,7 +3,7 @@
 require 'ibm_db'
 require 'yaml'
 
-class PGTest
+class DB2test
 
   def initialize
   	#config = YAML.load_file( '/home/ubuntu/DB-Performance-Testing/config/db.yml' )['DB2']
