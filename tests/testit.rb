@@ -43,7 +43,7 @@ def testSaddle( dbslug )
   when :pg
     @client = PGTest.new();
   when :mongo
-    @client = MongoTest.new( @pool_size );
+    @client = MongoTest.new( @pool_size.kind_of?(Array) ? @pool_size.max : @pool_size );
   when :hbase
     @client = HBaseTest.new();
   when :db2

@@ -66,6 +66,8 @@ class MongoTest
       #or just grab all of the users
       users = @db['users'].find({}, { :fields => {} } )
     end
+
+    p users.to_a
     users = users.to_a.map{|u| u['_id']}
 
     #return
