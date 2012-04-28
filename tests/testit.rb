@@ -11,9 +11,9 @@ require_relative 'threadPool.rb'
 #------- Config Variables ----------------------------------------------------
 
 #how many times to test each interaction?
-@return_tweets_for_a_user = 5000 #=> 2000
-@user_posts_a_new_tweet = 1000
-@return_tweets_for_a_hashtag = 1000
+@return_tweets_for_a_user = 50
+@user_posts_a_new_tweet = 10
+@return_tweets_for_a_hashtag = 10
 
 #and how big is our thread pool?
 @pool_size = 40
@@ -62,7 +62,7 @@ def testSaddle( dbslug )
   targets[:users] = @client.getUsers( ) 
   #but get just as many hashtags as we need
   targets[:hashtags] =  @client.getHashtags( @num_hashtags ) 
-  
+
   #initialize thread pool
   puts "- initializing thread pool of size #{@pool_size}..."
   # establish new DB connection for each thread (except mongo which shares a pool)
@@ -128,7 +128,7 @@ end
 
 #debug print function, turn on or off
 def debug( msg )
-  puts msg
+  puts Time.now.strftime("- %I:%M%p: ") + msg
 end
 
 #run it

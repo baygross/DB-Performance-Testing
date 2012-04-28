@@ -19,12 +19,29 @@ class MongoTest
   #or all hashtag ids if num_hashtags == nil
   def getHashtags( num_hashtags = nil )
     
-    #oh boy, grab every single hashtag
+
     debug "selecting for hashtags"
-    hashtags = @db['users'].find({}, {:fields => {'tweets.hashtags' => 1, '_id' => 0} })
-    hashtags = hashtags.to_a.collect{ |u| u['tweets'].collect{|t| t['hashtags']} }.flatten(2)
-    if num_hashtags
-      hashtags = hashtags.uniq.sample( num_hashtags )
+    if !num_hashtags
+      #oh boy, grab every single hashtag
+      data = @db['users'].find( {}, {:fields => {'tweets.hashtags' => 1, '_id' => 0} })
+    else
+      #just grab enough users so that we can get a good crop of hashtags
+      rseed = rand()
+      data = @db['users'].find( { 'random' => { '$gte' => rseed }  }, {:fields => {'tweets.hashtags' => 1, '_id' => 0} }).limit( num_hashtags * 10 )
+    end
+    
+    #turn user data response into array of hashtags
+    if !num_hashtags
+      #ALL the hashtags
+      hashtags = data.to_a.collect{ |u| u['tweets'].collect{|t| t['hashtags']} }.flatten(2)
+    else
+      #nah just sum
+      hashtags = []
+      data = data.to_a
+      while ( hashtags.length < num_hashtags )
+        x = data.sample['tweets'].sample['hashtags'].sample rescue nil
+        hashtags << x if !x.nil? && x != ''
+      end
     end
     
     #return our hashtags
