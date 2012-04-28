@@ -16,7 +16,7 @@ require_relative 'threadPool.rb'
 @return_tweets_for_a_hashtag = 20
 
 #and how big is our thread pool?
-@pool_size = [1, 2, 4, 8, 16, 32]
+@pool_size = [1, 2, 4, 8, 20, 40]
 
 #------------------------------------------------------------------------------
 def main
@@ -63,12 +63,14 @@ def testSaddle( dbslug )
   #but get just as many hashtags as we need
   targets[:hashtags] =  @client.getHashtags( @num_hashtags ) 
 
+  puts "threads \t tweet-searches \t new_tweets \t hashtag-searches \t time\n"
+ 
   #allow for repeat benchmarking with variable pool sizes
   @pool_size = [@pool_size] if !@pool_size.kind_of?(Array)
   @pool_size.each do |cur_pool|
     
     #initialize thread pool
-    puts "- initializing thread pool of size #{cur_pool}..."
+    debug "- initializing thread pool of size #{cur_pool}..."
     # establish new DB connection for each thread (except mongo which shares a pool)
     if dbslug == :mongo
       tpool = Pool.new(cur_pool, lambda {  } )
@@ -84,8 +86,8 @@ def testSaddle( dbslug )
     jobs = jobs.sort{ rand }
 
     ## Benchmarks begins here:----------------------------------------
-    puts "- starting benchmark now!"
-    puts Benchmark.measure { 
+    debug "- starting benchmark now!"
+    real_time = Benchmark.measure { 
     
       #iterate over all jobs
       jobs.each do |j| 
@@ -119,8 +121,14 @@ def testSaddle( dbslug )
       
       #then wait for threads to finish
       tpool.shutdown
-    }
+    }.real
     ##  Benchmark ends here: -------------------------------------------
+    puts cur_pool.to_s + "\t\t" + \
+     @return_tweets_for_a_user.to_s + "\t\t" + \
+     @user_posts_a_new_tweet.to_s + "\t\t" + \
+     @return_tweets_for_a_hashtag.to_s + "\t\t" + \
+     "%.8f" % real_time
+
     
   end #end pool loop
 end
