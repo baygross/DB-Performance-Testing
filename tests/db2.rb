@@ -71,7 +71,7 @@ class DB2test
     #insert 0-2 hashtags per tweet
     rand(2).times do
       new_tag = rand(@max_hash - @min_hash + 1) + @min_hash
-      IBM_DB.exec(@conn, 'INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ( #{ new_id }, #{ new_tag })')
+      IBM_DB.exec(@conn, "INSERT INTO hashtags_tweets(tweet_id, hashtag_id) VALUES ( #{ new_id }, #{ new_tag })")
     end
     
     debug "wrote new tweet for user: " + user_id.to_s
@@ -80,7 +80,7 @@ class DB2test
   #returns tweets for a given hashtag
   def lookup_hashtag (hashtag)
     # TODO: If bad performance, we might do a seondary query instead of a join
-    resp = IBM_DB.exec(@conn, 'SELECT * from tweets t INNER JOIN  hashtags_tweets ht ON ht.tweet_id = t.id INNER JOIN users u ON t.user_id = u.id WHERE hashtag_id = #{hashtag}')
+    resp = IBM_DB.exec(@conn, "SELECT * from tweets t INNER JOIN  hashtags_tweets ht ON ht.tweet_id = t.id INNER JOIN users u ON t.user_id = u.id WHERE hashtag_id = #{hashtag}")
     #TODO: Verify manually, cannot count results in DB2
     #debug 'hashtag: ' + hashtag.to_s + " had " + resp.count.to_s + " tweets"
     debug "fetched tweets for hashtag: " + hashtag.to_s
@@ -88,7 +88,7 @@ class DB2test
 
   #returns all tweets from a specific user
   def lookup_user (user_id)
-    tweets = IBM_DB.exec(@conn, 'SELECT * from tweets t WHERE user_id = #{user_id}')
+    tweets = IBM_DB.exec(@conn, "SELECT * from tweets t WHERE user_id = #{user_id}")
     #TODO: Verify manually, cannot count results in DB2
     #debug 'user: ' + user_id.to_s + " had " + resp.count.to_s + " tweets"
     debug "fetched tweets for user: " + user_id.to_s
@@ -98,4 +98,12 @@ end
 def getSimpleValue(conn, sql_statement)
 	r = IBM_DB.exec(conn, sql_statement)
 	IBM_DB.fetch_both(r)[0]
+end
+
+def resultLength(result)
+	i = 0
+	begin
+		r = IBM_DB.fetch_row(result)
+		i += 1
+	end while(r)
 end
