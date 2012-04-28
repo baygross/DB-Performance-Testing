@@ -11,9 +11,9 @@ require_relative 'threadPool.rb'
 #------- Config Variables ----------------------------------------------------
 
 #how many times to test each interaction?
-@return_tweets_for_a_user = 50
-@user_posts_a_new_tweet = 10
-@return_tweets_for_a_hashtag = 10
+@return_tweets_for_a_user = 200
+@user_posts_a_new_tweet = 20
+@return_tweets_for_a_hashtag = 20
 
 #and how big is our thread pool?
 @pool_size = [1, 2, 4, 8, 16, 32]
