@@ -108,7 +108,14 @@ class MongoTest
   #TODO: filter results specific tweets
   def lookup_hashtag (hashtag)
     results = @db['users'].find({'tweets.hashtags' => hashtag})
-    debug "hashtag: \'#" + hashtag.to_s + "\' had " + results.count.to_s + " tweets."
+    
+    #Filter them down to simulate display
+    sum = 0
+    results.each do |r|
+    	sum += r["tweets"].select{|t| t["hashtags"].include? hashtag}.length
+    end
+    
+    debug "hashtag: \'#" + hashtag.to_s + "\' had " + sum.to_s + " tweets."
   end
 
   #lookup all of the tweets for a specific user
