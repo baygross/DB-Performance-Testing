@@ -11,12 +11,18 @@ require_relative 'threadPool.rb'
 #------- Config Variables ----------------------------------------------------
 
 #how many times to test each interaction?
-@return_tweets_for_a_user = 200
-@user_posts_a_new_tweet = 20
-@return_tweets_for_a_hashtag = 20
+@return_tweets_for_a_user = 50
+@user_posts_a_new_tweet = 10
+@return_tweets_for_a_hashtag = 10
 
 #and how big is our thread pool?
 @pool_size = [1, 2, 4, 8, 20, 40]
+
+#run hashtag based queries or not?
+@run_hashtags = false
+
+#log debug notifications?
+@debug = true
 
 #------------------------------------------------------------------------------
 def main
@@ -25,8 +31,8 @@ def main
   @@path = Pathname(__FILE__).dirname.realpath
   
   #testSaddle( :pg )
-  testSaddle( :mongo )
-  #testSaddle( :hbase )
+  #testSaddle( :mongo )
+  testSaddle( :hbase )  #cannot handle hashtag load, must run with flag off
   #testSaddle( :db2 )
   
 end
@@ -61,7 +67,7 @@ def testSaddle( dbslug )
   #get all user ids/keys for now
   targets[:users] = @client.getUsers( ) 
   #but get just as many hashtags as we need
-  targets[:hashtags] =  @client.getHashtags( @num_hashtags ) 
+  targets[:hashtags] =  @client.getHashtags( @num_hashtags ) if @run_hashtags
 
   puts "threads \t tweet-searches \t new_tweets \t hashtag-searches \t time\n"
  
@@ -81,7 +87,7 @@ def testSaddle( dbslug )
     #generate a jobs list and randomly sort it
     jobs = []
     jobs += Array.new( @return_tweets_for_a_user, :user_lookup )
-    jobs += Array.new( @return_tweets_for_a_hashtag, :hash_lookup )
+    jobs += Array.new( @return_tweets_for_a_hashtag, :hash_lookup ) if @run_hashtags
     jobs += Array.new( @user_posts_a_new_tweet, :new_tweet )
     jobs = jobs.sort{ rand }
 
@@ -142,7 +148,7 @@ end
 
 #debug print function, turn on or off
 def debug( msg )
-  #puts Time.now.strftime("- %I:%M%p: ") + msg
+  puts Time.now.strftime("- %I:%M%p: ") + msg if @debug
 end
 
 #run it

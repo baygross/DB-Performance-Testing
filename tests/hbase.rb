@@ -30,8 +30,8 @@ class HBaseTest
   #establish connection to the DB
   def connectDB( )
     config = YAML.load_file( @@path + '../config/db.yml' )['HBase']
-    address = 'http://' + config['host'] + ':' + config['port'].to_s
-    @db = Stargate::Client.new( address )
+    @address = 'http://' + config['host'] + ':' + config['port'].to_s
+    @db = Stargate::Client.new( @address )
   end
   
   #returns the specified number of random hashtag ids from DB
@@ -86,11 +86,23 @@ class HBaseTest
     tweet_id = rand(9999)+10000 
     
     #add it to the DB
-    @db.create_row('users', user_id.to_s, Time.now.to_i, {:name => 'tweets:tweet' + tweet_id.to_s, :value => body})
-      
+    begin
+    	@db.create_row('users', user_id.to_s, Time.now.to_i, {:name => 'tweets:tweet' + tweet_id.to_s, :value => body})
+    rescue
+    	@db = Stargate::Client.new( @address, {:timeout => 15000} )
+    	@db.create_row('users', user_id.to_s, Time.now.to_i, {:name => 'tweets:tweet' + tweet_id.to_s, :value => body})
+    end
+  
     #then add it to 0-2 hashtags.
     rand(2) .times do 
-      @db.create_row('hashtags', randHashtag, Time.now.to_i, {:name => 'tweets:'+user_id.to_s + '_' + tweet_id.to_s, :value => body})
+      
+      begin
+      	@db.create_row('hashtags', randHashtag, Time.now.to_i, {:name => 'tweets:'+user_id.to_s + '_' + tweet_id.to_s, :value => body})
+      rescue
+      	@db = Stargate::Client.new( @address, {:timeout => 15000} )
+      	@db.create_row('hashtags', randHashtag, Time.now.to_i, {:name => 'tweets:'+user_id.to_s + '_' + tweet_id.to_s, :value => body})
+      end
+      
     end
     
     debug "wrote a new tweet for user: " + user_id.to_s
