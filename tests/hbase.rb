@@ -128,11 +128,12 @@ class HBaseTest
     rows = @db.show_row('users', user_id.to_s)
     i = 0
     
-    while !rows && i < 3 do
+    while !rows && i < 3
       @db = Stargate::Client.new( @address, {:timeout => 15000} )
       rows = @db.show_row('users', user_id.to_s)
-      i++
+      i += 1
     end
+
     
     if i==3
       puts "error finding user: " + user_id.to_s
