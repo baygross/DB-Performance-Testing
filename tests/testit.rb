@@ -22,7 +22,7 @@ require_relative 'threadPool.rb'
 @run_hashtags = false
 
 #log debug notifications?
-@debug = true
+@debug = false
 
 #------------------------------------------------------------------------------
 def main

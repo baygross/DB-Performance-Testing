@@ -126,7 +126,13 @@ class HBaseTest
   def lookup_user (user_id)
     
     rows = @db.show_row('users', user_id.to_s)
-    if !rows
+    i = 0
+    while !rows && i < 3
+      @db = Stargate::Client.new( @address, {:timeout => 15000} )
+      rows = @db.show_row('users', user_id.to_s)
+      i++
+    end
+    if i==3
       puts "error finding user: " + user_id.to_s
     else
       debug 'user: ' + user_id.to_s + " had " + rows.total_count.to_s + " tweets."
